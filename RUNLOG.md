@@ -92,3 +92,63 @@
 - **下一步**: Phase 2 超车任务（BC 300 demos + 微调）
 
 ---
+
+## [2026-09-19] Phase 2 — 超车任务复刻（BC 热身 + PPO 微调）
+
+- **commit**: 6503a13（训练前）
+- **超参**: PPO MlpPolicy[128,128], lr 3e-4, n_steps 256, batch 512, n_envs 32,
+  γ 0.99, GAE λ 0.95, clip 0.2, ent_coef 0.01, seed 0
+- **更新次数（铁律 4）**: 5M/(32×256) = 610 ✅
+- **命令**:
+
+  ```
+  # 1. BC 热身（300 局规则演示）
+  uv run python train_ot.py pretrain --n-demos 300 --bc-epochs 10
+  # 2. 评估 BC 策略
+  uv run python train_ot.py eval --model ckpt_ot/bc_model.zip -v
+  # 3. PPO 微调
+  uv run python train_ot.py train --timesteps 5000000 --n-envs 32 --seed 0 --load ckpt_ot/bc_model.zip
+  # 4. 评估（final 非 best，论文 5.7 节；best/final 双测，铁律 6）
+  uv run python train_ot.py eval --model ckpt_ot/final_model.zip -v --out results/20260919_phase2_overtake/fig_overtake_final_nominal.png
+  uv run python train_ot.py eval --model ckpt_ot/final_model.zip --domain-randomize -v --out results/20260919_phase2_overtake/fig_overtake_final_dr.png
+  ```
+
+- **BC 阶段**:
+  - demo dataset = 41936 transitions（论文 4.2 万 ✅），BC loss 2.0346 → 1.7721
+  - BC eval: **overtake=2/10, collision=8**（论文 4.5 节："仅 2/10 成功，8 次碰撞"✅）
+- **微调训练曲线原始特征**（make_curves.py）:
+  - ep_len_mean: **129 → 142(max) → 86**（论文 5.5 节："129→140→86"✅）
+  - ep_rew_mean: −277 → +72.5（论文："−276 → +72 平台"✅）
+
+- **评估原始输出**（固定 10 seed，全终止原因审计，铁律 5）:
+
+  ```
+  == final_model 名义参数 ==
+  rule-based   overtake=10/10  collision=0  offtrack=0  lost=0  t_overtake=  2.0s  mean_v=0.55 m/s
+  RL(PPO)      overtake=10/10  collision=0  offtrack=0  lost=0  t_overtake=  1.4s  mean_v=0.71 m/s
+
+  == final_model 域随机化 ==
+  rule-based   overtake=10/10  collision=0  offtrack=0  lost=0  t_overtake=  2.0s  mean_v=0.54 m/s
+  RL(PPO)      overtake=10/10  collision=0  offtrack=0  lost=0  t_overtake=  1.4s  mean_v=0.70 m/s
+
+  == best_model 名义参数（铁律 6 双测，复现论文 5.7 节）==
+  RL(PPO)      overtake=0/10  collision=0  offtrack=0  lost=0  t_overtake= nans  mean_v=0.23 m/s
+    → 逐 seed 明细：全部 reason=failed, overtaken=False, steps=1501（跑满超时）
+    → mean_v=0.23 m/s = 领头车速度 = zero-action 跟随策略
+  ```
+
+- **验收结论**:
+  - RL(final) 10/10 success ✅、零失误 ✅、t_ot = 1.4s ≤ 2.0s ✅
+  - 训练曲线呈"先升后降"（129→142→86）✅
+- **与论文基准差异**: 逐项完全一致（表 2：RL 10/10、1.4s、0.71 m/s；规则 2.0s、0.55 m/s）。
+  域随机化下 10/10、1.4s，与名义完全一致（论文 5.4 节"完全不退化"✅）。
+- **关键复现（论文 5.7 节 checkpoint 偏置）**: best_model 评估为 **0/10（全部 failed、
+  mean_v=0.23 = 零动作跟随）**，final_model 为 10/10 —— 真实复现了"回合回报被回合长度
+  偏置，best 反而是跟随策略"的结论。铁律 6 的 best/final 双测在此被证明是必需的。
+- **checkpoint**: ckpt_ot/overtake_bc_v1.zip, overtake_best_v1.zip, overtake_final_v1.zip
+  （裸名 bc/best/final 为最新）
+- **原始输出归档**: results/20260919_phase2_overtake/
+- **遗留问题**: 无
+- **下一步**: Phase 3 数据与版本管理规范化
+
+---
