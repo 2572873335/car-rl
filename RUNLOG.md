@@ -318,3 +318,34 @@ best 0/10 跟随（复现 5.7 节）；BC 2/10（复现 4.5 节）。checkpoint
 - **产物**: `project_paper/project_report_full.md`、`project_paper/figures_v2/`（13 图）
 
 ---
+
+## [2026-09-20] Phase A 前置 — 演示数据集导出（RQ2 输入）
+
+- **commit**: （本批）
+- **任务**: 路线图 §4 立即动作② —— export_demos.py 导出 BC 演示数据集并算 sha256
+- **命令与原始输出**:
+
+  ```
+  $ uv run python export_demos.py --n-demos 300 --out demos_v1.npz
+  collecting 300 rule-based demos (seed base 30000) ...
+  dataset: 41936 transitions, 300 episodes
+    obs dim = 6, act dim = 2
+    rewards: mean=0.549 min=-0.1 max=60.3
+  episode outcomes: success 300 (100%)
+  wrote demos_v1.npz (1.38 MB)
+  sha256 4b31c47e7605df0eb269a02eeb46d8f6dbab97cf7b312e38d49045193c47f429  demos_v1.npz
+  ```
+
+- **数据完整性校验**: next_obs[t] == obs[t+1] 逐点吻合；300 集各含真终止标记；
+  观测 6 维 / 动作 2 维与环境一致。
+- **验收结论**: 41936 转移 = 论文「4.2 万」一致；seed 族与 pretrain 一致（可与 BC 2/10 对比）。
+- **与论文基准差异**: 300/300 success（规则机在演示 seed 下从不失败，与 rule-only 10/10 一致）；
+  数据集为 **positive-only**（无失败轨迹）——已记录于 demos_v1_README.md 的「用途与边界」。
+- **环境冻结**: export_demos.py 仅依赖 numpy，未装 d3rlpy（其 pin gymnasium==1.0.0，
+  会降级本项目 1.3.0）——d3rlpy 留到 Phase A W2 独立 venv 加载。
+- **gitignore 例外**: 加 `!demos_v1.npz`（否则 `*.npz` 静默吞掉发布资产，评审已预警）。
+- **产物**: demos_v1.npz、demos_v1_README.md、export_demos.py、DATA_MANAGEMENT §9
+- **遗留问题**: 无
+- **下一步**: Phase A W1（鲁棒性扫描 A1/A2 + SAC 消融 A3）
+
+---

@@ -237,3 +237,6 @@ week1_sim_result.png
 
 # --- local network helper (not part of the project) ---
 tcpfwd.py
+
+# --- published data assets (exception to *.npz) ---
+!demos_v1.npz
