@@ -1,0 +1,26 @@
+/home/zy/car_rl/code0919/.venv/lib/python3.13/site-packages/stable_baselines3/common/on_policy_algorithm.py:150: UserWarning: You are trying to run PPO on the GPU, but it is primarily intended to run on the CPU when not using a CNN policy (you are using ActorCriticPolicy which should be a MlpPolicy). See https://github.com/DLR-RM/stable-baselines3/issues/1245 for more info. You can pass `device='cpu'` or `export CUDA_VISIBLE_DEVICES=` to force using the CPU.Note: The model will train, but the GPU utilization will be poor and the training might take longer than on CPU.
+  warnings.warn(
+evaluating 10 fixed seeds (domain_randomize=False)
+rule-based   overtake=10/10  collision=0  offtrack=0  lost=0  t_overtake=  2.0s  mean_v=0.55 m/s
+    seed=2000 constant  gap0=0.59 steps= 143 success  overtaken=True t_ot=2.0s
+    seed=2001 constant  gap0=0.85 steps= 165 success  overtaken=True t_ot=2.5s
+    seed=2002 constant  gap0=0.42 steps= 118 success  overtaken=True t_ot=1.5s
+    seed=2003 brake     gap0=0.47 steps= 104 success  overtaken=True t_ot=1.3s
+    seed=2004 sinusoid  gap0=0.68 steps= 146 success  overtaken=True t_ot=2.1s
+    seed=2005 sinusoid  gap0=0.78 steps= 150 success  overtaken=True t_ot=2.7s
+    seed=2006 sinusoid  gap0=0.59 steps= 141 success  overtaken=True t_ot=2.2s
+    seed=2007 constant  gap0=0.37 steps= 111 success  overtaken=True t_ot=1.4s
+    seed=2008 brake     gap0=0.96 steps= 178 success  overtaken=True t_ot=2.8s
+    seed=2009 sinusoid  gap0=0.51 steps= 128 success  overtaken=True t_ot=1.7s
+RL(PPO)      overtake=10/10  collision=0  offtrack=0  lost=0  t_overtake=  1.4s  mean_v=0.71 m/s
+    seed=2000 constant  gap0=0.59 steps=  88 success  overtaken=True t_ot=1.4s
+    seed=2001 constant  gap0=0.85 steps=  92 success  overtaken=True t_ot=1.5s
+    seed=2002 constant  gap0=0.42 steps=  85 success  overtaken=True t_ot=1.3s
+    seed=2003 brake     gap0=0.47 steps=  71 success  overtaken=True t_ot=1.1s
+    seed=2004 sinusoid  gap0=0.68 steps=  85 success  overtaken=True t_ot=1.4s
+    seed=2005 sinusoid  gap0=0.78 steps= 102 success  overtaken=True t_ot=1.6s
+    seed=2006 sinusoid  gap0=0.59 steps=  99 success  overtaken=True t_ot=1.6s
+    seed=2007 constant  gap0=0.37 steps=  80 success  overtaken=True t_ot=1.2s
+    seed=2008 brake     gap0=0.96 steps=  86 success  overtaken=True t_ot=1.4s
+    seed=2009 sinusoid  gap0=0.51 steps=  83 success  overtaken=True t_ot=1.3s
+figure saved -> results/20260919_phase2_overtake/fig_overtake_final_nominal.png

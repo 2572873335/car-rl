@@ -1,0 +1,3 @@
+evaluating 10 fixed seeds (domain_randomize=False)
+rule-based   overtake=10/10  collision=0  offtrack=0  lost=0  t_overtake=  2.0s  mean_v=0.55 m/s
+figure saved -> results/20260919_phase0_healthcheck/eval_overtake_ruleonly.png

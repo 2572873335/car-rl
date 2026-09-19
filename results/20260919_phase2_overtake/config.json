@@ -1,0 +1,27 @@
+{
+  "experiment": "phase2_overtake",
+  "date": "2026-09-19",
+  "pipeline": "LfD: BC warm start (300 rule demos) -> PPO fine-tune 5M -> eval final_model",
+  "hyperparams": {
+    "algorithm": "PPO",
+    "policy": "MlpPolicy [128,128]",
+    "learning_rate": 3e-4,
+    "n_steps": 256,
+    "batch_size": 512,
+    "n_envs": 32,
+    "gamma": 0.99,
+    "gae_lambda": 0.95,
+    "clip_range": 0.2,
+    "ent_coef": 0.01,
+    "seed": 0,
+    "updates": 610
+  },
+  "steps": {
+    "pretrain": {"cmd": "uv run python train_ot.py pretrain --n-demos 300 --bc-epochs 10", "transitions": 41936, "bc_loss_final": 1.7721},
+    "eval_bc": {"cmd": "uv run python train_ot.py eval --model ckpt_ot/bc_model.zip -v", "result": "2/10 success, 8 collision"},
+    "finetune": {"cmd": "uv run python train_ot.py train --timesteps 5000000 --n-envs 32 --seed 0 --load ckpt_ot/bc_model.zip"},
+    "eval_final": {"cmd": "uv run python train_ot.py eval --model ckpt_ot/final_model.zip -v", "note": "final not best - see paper 5.7 (reward biased by episode length)"}
+  },
+  "acceptance": "10/10 success, zero failures, t_overtake <= 2.0s; training curve ep_len up-then-down (129->140->86)",
+  "curriculum_note": "overtake pretrain/train use default easy=False path per paper; overtake has no --easy stage in Phase 2"
+}

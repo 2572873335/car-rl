@@ -1,0 +1,7 @@
+== sim done: T=45.0s  v_set=0.3m/s  d_des=0.2m ==
+  mean|gap err| = 1.10 cm
+  max |gap err| = 2.50 cm
+  last gap      = 18.78 cm
+  follower lateral RMS = 2.66 cm
+  near-collision steps (gap<12cm) = 0
+  figure saved -> week1_sim_result.png

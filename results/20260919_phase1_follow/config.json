@@ -1,0 +1,29 @@
+{
+  "experiment": "phase1_follow",
+  "date": "2026-09-19",
+  "pipeline": "two-stage curriculum: stage1 easy (2.5M) then stage2 full (5M, load stage1 best)",
+  "hyperparams": {
+    "algorithm": "PPO",
+    "policy": "MlpPolicy [128,128]",
+    "learning_rate": 3e-4,
+    "n_steps": 256,
+    "batch_size": 512,
+    "n_envs": 32,
+    "gamma": 0.99,
+    "gae_lambda": 0.95,
+    "clip_range": 0.2,
+    "ent_coef": 0.01,
+    "updates_stage1": 305,
+    "updates_stage2": 610
+  },
+  "stage1": {
+    "cmd": "uv run python train_ppo.py train --easy --timesteps 2500000 --n-envs 32 --seed 0",
+    "note": "timesteps raised 2M->2.5M to satisfy iron rule 4 (updates>=300); paper cmd gives only 244"
+  },
+  "stage2": {
+    "cmd": "uv run python train_ppo.py train --timesteps 5000000 --n-envs 32 --seed 0 --load ckpt/best_model.zip"
+  },
+  "eval_cmd_nominal": "uv run python train_ppo.py eval --model ckpt/best_model.zip -v --out results/.../fig_follow_eval_nominal.png",
+  "eval_cmd_dr": "uv run python train_ppo.py eval --model ckpt/best_model.zip --domain-randomize -v --out results/.../fig_follow_eval_dr.png",
+  "acceptance": "RL mean|e| <= 1.3cm and zero collisions; rule P crashes 10/10; rule P+FF ~2cm"
+}

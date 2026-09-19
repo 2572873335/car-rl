@@ -1,0 +1,9 @@
+# RL car-following project deps (2026-09-19)
+# torch from cu128 index (RTX 5060 / Blackwell, sm_120 needs torch>=2.7)
+--extra-index-url https://download.pytorch.org/whl/cu128
+torch>=2.7.0
+numpy>=1.26
+matplotlib>=3.8
+gymnasium>=1.0
+stable-baselines3>=2.4
+tensorboard>=2.16

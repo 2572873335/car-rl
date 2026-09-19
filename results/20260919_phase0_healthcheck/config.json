@@ -1,0 +1,17 @@
+{
+  "experiment": "phase0_healthcheck",
+  "date": "2026-09-19",
+  "purpose": "Pre-training health checks (iron rule 3): rule baseline must pass before any training",
+  "python": "3.13.15",
+  "torch": "2.11.0+cu128",
+  "stable_baselines3": "2.9.0",
+  "gymnasium": "1.3.0",
+  "numpy": "2.5.2",
+  "gpu": "NVIDIA GeForce RTX 5060 (8151 MiB)",
+  "checks": {
+    "follow_sim_baseline": {"cmd": "uv run python car_following_sim.py", "mean_abs_e_cm": 1.10, "threshold_cm": 1.2, "passed": true},
+    "overtake_rule_only": {"cmd": "uv run python train_ot.py eval --rule-only", "overtake": "10/10", "collision": 0, "offtrack": 0, "lost": 0, "t_overtake_s": 2.0, "passed": true}
+  },
+  "env_freeze": "follow_env.py / overtake_env.py unmodified from paper final version",
+  "note": "seed for rule-only eval = default range(2000,2010)"
+}
