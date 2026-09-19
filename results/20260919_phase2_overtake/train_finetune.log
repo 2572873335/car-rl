@@ -1,0 +1,72 @@
+/home/zy/car_rl/code0919/.venv/lib/python3.13/site-packages/stable_baselines3/common/on_policy_algorithm.py:150: UserWarning: You are trying to run PPO on the GPU, but it is primarily intended to run on the CPU when not using a CNN policy (you are using ActorCriticPolicy which should be a MlpPolicy). See https://github.com/DLR-RM/stable-baselines3/issues/1245 for more info. You can pass `device='cpu'` or `export CUDA_VISIBLE_DEVICES=` to force using the CPU.Note: The model will train, but the GPU utilization will be poor and the training might take longer than on CPU.
+  warnings.warn(
+continuing from ckpt_ot/bc_model.zip
+Logging to ./tb_logs_ot/PPO_1
+/home/zy/car_rl/code0919/.venv/lib/python3.13/site-packages/stable_baselines3/common/callbacks.py:419: UserWarning: Training and eval env are not of the same type<stable_baselines3.common.vec_env.vec_monitor.VecMonitor object at 0x749b490f2f90> != <stable_baselines3.common.vec_env.dummy_vec_env.DummyVecEnv object at 0x749b490f30e0>
+  warnings.warn("Training and eval env are not of the same type" f"{self.training_env} != {self.eval_env}")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 129      |
+|    ep_rew_mean     | -277     |
+| time/              |          |
+|    fps             | 4765     |
+|    iterations      | 1        |
+|    time_elapsed    | 13       |
+|    total_timesteps | 65536    |
+---------------------------------
+------------------------------------------
+| rollout/                |              |
+|    ep_len_mean          | 131          |
+|    ep_rew_mean          | -253         |
+| time/                   |              |
+|    fps                  | 1432         |
+|    iterations           | 2            |
+|    time_elapsed         | 91           |
+|    total_timesteps      | 131072       |
+| train/                  |              |
+|    approx_kl            | 0.0031958064 |
+|    clip_fraction        | 0.0243       |
+|    clip_range           | 0.2          |
+|    entropy_loss         | -2.72        |
+|    explained_variance   | -0.00182     |
+|    learning_rate        | 0.0003       |
+|    loss                 | 1.3e+03      |
+|    n_updates            | 10           |
+|    policy_gradient_loss | -0.000504    |
+|    std                  | 0.942        |
+|    value_loss           | 4.78e+03     |
+------------------------------------------
+/home/zy/car_rl/code0919/.venv/lib/python3.13/site-packages/stable_baselines3/common/evaluation.py:71: UserWarning: Evaluation environment is not wrapped with a ``Monitor`` wrapper. This may result in reporting modified episode lengths and rewards, if other wrappers happen to modify these. Consider wrapping environment first with ``Monitor`` wrapper.
+  warnings.warn(
+Eval num_timesteps=160000, episode_reward=-483.84 +/- 4.25
+Episode length: 189.40 +/- 59.99
+------------------------------------------
+| eval/                   |              |
+|    mean_ep_length       | 189          |
+|    mean_reward          | -484         |
+| time/                   |              |
+|    total_timesteps      | 160000       |
+| train/                  |              |
+|    approx_kl            | 0.0035963338 |
+|    clip_fraction        | 0.0318       |
+|    clip_range           | 0.2          |
+|    entropy_loss         | -2.72        |
+|    explained_variance   | 0.695        |
+|    learning_rate        | 0.0003       |
+|    loss                 | 405          |
+|    n_updates            | 20           |
+|    policy_gradient_loss | -0.00149     |
+|    std                  | 0.941        |
+|    value_loss           | 2.71e+03     |
+------------------------------------------
+New best mean reward!
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 128      |
+|    ep_rew_mean     | -137     |
+| time/              |          |
+|    fps             | 1210     |
+|    iterations      | 3        |
+|    time_elapsed    | 162      |
+|    total_timesteps | 196608   |
+---------------------------------

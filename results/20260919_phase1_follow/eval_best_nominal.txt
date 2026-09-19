@@ -1,0 +1,37 @@
+/home/zy/car_rl/code0919/.venv/lib/python3.13/site-packages/stable_baselines3/common/on_policy_algorithm.py:150: UserWarning: You are trying to run PPO on the GPU, but it is primarily intended to run on the CPU when not using a CNN policy (you are using ActorCriticPolicy which should be a MlpPolicy). See https://github.com/DLR-RM/stable-baselines3/issues/1245 for more info. You can pass `device='cpu'` or `export CUDA_VISIBLE_DEVICES=` to force using the CPU.Note: The model will train, but the GPU utilization will be poor and the training might take longer than on CPU.
+  warnings.warn(
+evaluating 10 fixed seeds (domain_randomize=False)
+    seed=1000 brake     gap0=0.95 steps=1001 timeout  settled|e|=  1.69cm
+    seed=1001 brake     gap0=0.30 steps=1001 timeout  settled|e|=  2.01cm
+    seed=1002 brake     gap0=0.32 steps=1001 timeout  settled|e|=  1.36cm
+    seed=1003 sinusoid  gap0=0.80 steps=1001 timeout  settled|e|=  0.81cm
+    seed=1004 constant  gap0=0.76 steps=1001 timeout  settled|e|=  0.47cm
+    seed=1005 brake     gap0=0.70 steps=1001 timeout  settled|e|=  0.66cm
+    seed=1006 constant  gap0=0.56 steps=1001 timeout  settled|e|=  0.99cm
+    seed=1007 brake     gap0=0.40 steps=1001 timeout  settled|e|=  0.58cm
+    seed=1008 sinusoid  gap0=0.22 steps=1001 timeout  settled|e|=  0.71cm
+    seed=1009 sinusoid  gap0=0.70 steps=1001 timeout  settled|e|=  0.71cm
+RL(PPO)      mean|e|=  1.00 cm  worst|e|=150.74 cm  collision=0 lost=0 offtrack=0 /10
+    seed=1000 brake     gap0=0.95 steps=  65 collision settled|e|= 72.60cm
+    seed=1001 brake     gap0=0.30 steps=  51 collision settled|e|=  9.89cm
+    seed=1002 brake     gap0=0.32 steps=  54 collision settled|e|= 10.84cm
+    seed=1003 sinusoid  gap0=0.80 steps=  60 collision settled|e|= 60.18cm
+    seed=1004 constant  gap0=0.76 steps=  59 collision settled|e|= 58.63cm
+    seed=1005 brake     gap0=0.70 steps=  50 collision settled|e|= 47.89cm
+    seed=1006 constant  gap0=0.56 steps=  52 collision settled|e|= 39.78cm
+    seed=1007 brake     gap0=0.40 steps=  36 collision settled|e|= 19.10cm
+    seed=1008 sinusoid  gap0=0.22 steps= 135 collision settled|e|= 10.10cm
+    seed=1009 sinusoid  gap0=0.70 steps=  55 collision settled|e|= 50.83cm
+rule P       mean|e|= 37.98 cm  worst|e|=150.74 cm  collision=10 lost=0 offtrack=0 /10
+    seed=1000 brake     gap0=0.95 steps=1001 timeout  settled|e|=  2.06cm
+    seed=1001 brake     gap0=0.30 steps=1001 timeout  settled|e|=  1.93cm
+    seed=1002 brake     gap0=0.32 steps=1001 timeout  settled|e|=  1.97cm
+    seed=1003 sinusoid  gap0=0.80 steps=1001 timeout  settled|e|=  2.06cm
+    seed=1004 constant  gap0=0.76 steps=1001 timeout  settled|e|=  1.94cm
+    seed=1005 brake     gap0=0.70 steps=1001 timeout  settled|e|=  1.76cm
+    seed=1006 constant  gap0=0.56 steps=1001 timeout  settled|e|=  2.05cm
+    seed=1007 brake     gap0=0.40 steps=1001 timeout  settled|e|=  1.61cm
+    seed=1008 sinusoid  gap0=0.22 steps=1001 timeout  settled|e|=  1.85cm
+    seed=1009 sinusoid  gap0=0.70 steps=1001 timeout  settled|e|=  2.04cm
+rule P+FF    mean|e|=  1.93 cm  worst|e|=150.74 cm  collision=0 lost=0 offtrack=0 /10
+figure saved -> results/20260919_phase1_follow/fig_follow_eval_best_nominal.png

@@ -1,0 +1,18 @@
+/home/zy/car_rl/code0919/train_ot.py:185: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:836.)
+  tot += float(loss) * len(idx)
+/home/zy/car_rl/code0919/.venv/lib/python3.13/site-packages/stable_baselines3/common/save_util.py:284: UserWarning: Path 'ckpt_ot' does not exist. Will create it.
+  warnings.warn(f"Path '{path.parent}' does not exist. Will create it.")
+collecting 300 rule-based demonstrations ...
+demo dataset: 41936 transitions
+  BC epoch 1/10  loss=2.0346
+  BC epoch 2/10  loss=1.9501
+  BC epoch 3/10  loss=1.9026
+  BC epoch 4/10  loss=1.8729
+  BC epoch 5/10  loss=1.8581
+  BC epoch 6/10  loss=1.8397
+  BC epoch 7/10  loss=1.8205
+  BC epoch 8/10  loss=1.8034
+  BC epoch 9/10  loss=1.7869
+  BC epoch 10/10  loss=1.7721
+BC model -> ckpt_ot/bc_model.zip

@@ -1,0 +1,114 @@
+/home/zy/car_rl/code0919/.venv/lib/python3.13/site-packages/stable_baselines3/common/on_policy_algorithm.py:150: UserWarning: You are trying to run PPO on the GPU, but it is primarily intended to run on the CPU when not using a CNN policy (you are using ActorCriticPolicy which should be a MlpPolicy). See https://github.com/DLR-RM/stable-baselines3/issues/1245 for more info. You can pass `device='cpu'` or `export CUDA_VISIBLE_DEVICES=` to force using the CPU.Note: The model will train, but the GPU utilization will be poor and the training might take longer than on CPU.
+  warnings.warn(
+evaluating 10 fixed seeds (domain_randomize=False)
+rule-based   overtake=10/10  collision=0  offtrack=0  lost=0  t_overtake=  2.0s  mean_v=0.55 m/s
+    seed=2000 constant  gap0=0.59 steps= 143 success  overtaken=True t_ot=2.0s
+    seed=2001 constant  gap0=0.85 steps= 165 success  overtaken=True t_ot=2.5s
+    seed=2002 constant  gap0=0.42 steps= 118 success  overtaken=True t_ot=1.5s
+    seed=2003 brake     gap0=0.47 steps= 104 success  overtaken=True t_ot=1.3s
+    seed=2004 sinusoid  gap0=0.68 steps= 146 success  overtaken=True t_ot=2.1s
+    seed=2005 sinusoid  gap0=0.78 steps= 150 success  overtaken=True t_ot=2.7s
+    seed=2006 sinusoid  gap0=0.59 steps= 141 success  overtaken=True t_ot=2.2s
+    seed=2007 constant  gap0=0.37 steps= 111 success  overtaken=True t_ot=1.4s
+    seed=2008 brake     gap0=0.96 steps= 178 success  overtaken=True t_ot=2.8s
+    seed=2009 sinusoid  gap0=0.51 steps= 128 success  overtaken=True t_ot=1.7s
+RL(PPO)      overtake=2/10  collision=8  offtrack=0  lost=0  t_overtake=  2.2s  mean_v=0.50 m/s
+    seed=2000 constant  gap0=0.59 steps=  78 collision overtaken=False t_ot=nans
+      last steps before termination (t, v_f, lane, e_lat[cm]):
+        t=  0.98 v=0.58 lane=0 e_lat=  +5.0
+        t=  1.04 v=0.57 lane=0 e_lat=  +5.0
+        t=  1.10 v=0.57 lane=0 e_lat=  +5.0
+        t=  1.16 v=0.56 lane=0 e_lat=  +4.8
+        t=  1.22 v=0.56 lane=0 e_lat=  +4.6
+        t=  1.28 v=0.55 lane=0 e_lat=  +4.3
+        t=  1.34 v=0.55 lane=0 e_lat=  +4.0
+        t=  1.40 v=0.54 lane=0 e_lat=  +3.6
+        t=  1.46 v=0.54 lane=0 e_lat=  +3.3
+        t=  1.52 v=0.53 lane=0 e_lat=  +2.9
+    seed=2001 constant  gap0=0.85 steps= 106 collision overtaken=False t_ot=nans
+      last steps before termination (t, v_f, lane, e_lat[cm]):
+        t=  1.54 v=0.54 lane=0 e_lat=  +6.1
+        t=  1.60 v=0.53 lane=0 e_lat=  +5.6
+        t=  1.66 v=0.53 lane=0 e_lat=  +5.1
+        t=  1.72 v=0.52 lane=0 e_lat=  +4.6
+        t=  1.78 v=0.52 lane=0 e_lat=  +4.0
+        t=  1.84 v=0.52 lane=0 e_lat=  +3.5
+        t=  1.90 v=0.51 lane=0 e_lat=  +3.0
+        t=  1.96 v=0.51 lane=0 e_lat=  +2.6
+        t=  2.02 v=0.50 lane=0 e_lat=  +2.1
+        t=  2.08 v=0.50 lane=0 e_lat=  +1.8
+    seed=2002 constant  gap0=0.42 steps=  58 collision overtaken=False t_ot=nans
+      last steps before termination (t, v_f, lane, e_lat[cm]):
+        t=  0.58 v=0.67 lane=0 e_lat=  +1.2
+        t=  0.64 v=0.66 lane=0 e_lat=  +1.4
+        t=  0.70 v=0.66 lane=0 e_lat=  +1.7
+        t=  0.76 v=0.65 lane=0 e_lat=  +1.9
+        t=  0.82 v=0.64 lane=0 e_lat=  +2.1
+        t=  0.88 v=0.63 lane=0 e_lat=  +2.2
+        t=  0.94 v=0.60 lane=1 e_lat= -12.7
+        t=  1.00 v=0.60 lane=1 e_lat= -12.6
+        t=  1.06 v=0.60 lane=1 e_lat= -12.3
+        t=  1.12 v=0.60 lane=1 e_lat= -11.8
+    seed=2003 brake     gap0=0.47 steps=  76 collision overtaken=False t_ot=nans
+      last steps before termination (t, v_f, lane, e_lat[cm]):
+        t=  0.94 v=0.28 lane=0 e_lat=  +2.9
+        t=  1.00 v=0.27 lane=0 e_lat=  +2.9
+        t=  1.06 v=0.27 lane=0 e_lat=  +2.9
+        t=  1.12 v=0.26 lane=0 e_lat=  +2.8
+        t=  1.18 v=0.26 lane=0 e_lat=  +2.7
+        t=  1.24 v=0.29 lane=0 e_lat=  +2.6
+        t=  1.30 v=0.38 lane=0 e_lat=  +2.4
+        t=  1.36 v=0.47 lane=0 e_lat=  +2.2
+        t=  1.42 v=0.47 lane=0 e_lat=  +1.9
+        t=  1.48 v=0.47 lane=0 e_lat=  +1.6
+    seed=2004 sinusoid  gap0=0.68 steps=  96 collision overtaken=False t_ot=nans
+      last steps before termination (t, v_f, lane, e_lat[cm]):
+        t=  1.34 v=0.44 lane=0 e_lat=  +5.4
+        t=  1.40 v=0.43 lane=0 e_lat=  +5.0
+        t=  1.46 v=0.43 lane=0 e_lat=  +4.6
+        t=  1.52 v=0.42 lane=0 e_lat=  +4.2
+        t=  1.58 v=0.42 lane=0 e_lat=  +3.8
+        t=  1.64 v=0.41 lane=0 e_lat=  +3.4
+        t=  1.70 v=0.41 lane=0 e_lat=  +3.0
+        t=  1.76 v=0.40 lane=0 e_lat=  +2.7
+        t=  1.82 v=0.40 lane=0 e_lat=  +2.3
+        t=  1.88 v=0.40 lane=0 e_lat=  +2.0
+    seed=2005 sinusoid  gap0=0.78 steps= 141 success  overtaken=True t_ot=2.3s
+    seed=2006 sinusoid  gap0=0.59 steps= 133 success  overtaken=True t_ot=2.0s
+    seed=2007 constant  gap0=0.37 steps=  50 collision overtaken=False t_ot=nans
+      last steps before termination (t, v_f, lane, e_lat[cm]):
+        t=  0.42 v=0.63 lane=0 e_lat=  +0.6
+        t=  0.48 v=0.64 lane=0 e_lat=  +0.6
+        t=  0.54 v=0.63 lane=0 e_lat=  +0.7
+        t=  0.60 v=0.63 lane=0 e_lat=  +0.9
+        t=  0.66 v=0.62 lane=0 e_lat=  +1.0
+        t=  0.72 v=0.61 lane=0 e_lat=  +1.2
+        t=  0.78 v=0.60 lane=0 e_lat=  +1.3
+        t=  0.84 v=0.60 lane=0 e_lat=  +1.4
+        t=  0.90 v=0.59 lane=0 e_lat=  +1.4
+        t=  0.96 v=0.58 lane=0 e_lat=  +1.4
+    seed=2008 brake     gap0=0.96 steps= 133 collision overtaken=False t_ot=nans
+      last steps before termination (t, v_f, lane, e_lat[cm]):
+        t=  2.08 v=0.60 lane=1 e_lat= -11.0
+        t=  2.14 v=0.60 lane=1 e_lat= -10.8
+        t=  2.20 v=0.60 lane=1 e_lat= -10.5
+        t=  2.26 v=0.60 lane=1 e_lat=  -9.9
+        t=  2.32 v=0.60 lane=1 e_lat=  -9.3
+        t=  2.38 v=0.60 lane=1 e_lat=  -8.6
+        t=  2.44 v=0.60 lane=1 e_lat=  -7.8
+        t=  2.50 v=0.60 lane=1 e_lat=  -6.9
+        t=  2.56 v=0.60 lane=1 e_lat=  -6.1
+        t=  2.62 v=0.60 lane=1 e_lat=  -5.3
+    seed=2009 sinusoid  gap0=0.51 steps=  71 collision overtaken=False t_ot=nans
+      last steps before termination (t, v_f, lane, e_lat[cm]):
+        t=  0.84 v=0.56 lane=0 e_lat=  +3.4
+        t=  0.90 v=0.55 lane=0 e_lat=  +3.5
+        t=  0.96 v=0.54 lane=0 e_lat=  +3.6
+        t=  1.02 v=0.53 lane=0 e_lat=  +3.6
+        t=  1.08 v=0.52 lane=0 e_lat=  +3.6
+        t=  1.14 v=0.51 lane=0 e_lat=  +3.4
+        t=  1.20 v=0.50 lane=0 e_lat=  +3.2
+        t=  1.26 v=0.49 lane=0 e_lat=  +3.0
+        t=  1.32 v=0.48 lane=0 e_lat=  +2.8
+        t=  1.38 v=0.47 lane=0 e_lat=  +2.5
+figure saved -> results/20260919_phase2_overtake/fig_overtake_bc_eval.png
