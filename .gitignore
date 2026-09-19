@@ -234,3 +234,6 @@ week1_sim_result.png
 # --- editor ---
 .vscode/
 .idea/
+
+# --- local network helper (not part of the project) ---
+tcpfwd.py
