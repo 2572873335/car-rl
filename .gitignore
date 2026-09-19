@@ -240,3 +240,8 @@ tcpfwd.py
 
 # --- published data assets (exception to *.npz) ---
 !demos_v1.npz
+
+# --- offline-RL isolated venv (d3rlpy pins gymnasium 1.0.0; do not freeze)
+.venv-d3rlpy/
+d3rlpy_logs/
+ckpt_offline/
