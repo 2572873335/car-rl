@@ -152,3 +152,44 @@
 - **下一步**: Phase 3 数据与版本管理规范化
 
 ---
+
+## [2026-09-19] Phase 3 — 数据与版本管理规范化
+
+- **commit**: 897a07e（Phase 2 完成后）
+- **目的**: 建立并执行数据/版本管理规范（铁律 7）
+- **执行内容**:
+  1. **git 仓库**: `.gitignore` 排除 `.venv/`、`__pycache__/`、`tb_logs*/`、
+     `*.zip`、`*.npz`、根目录 `*.png`、`*:Zone.Identifier`。代码与文档进版本库。
+  2. **git tag 里程碑**: `milestone/phase0-env`(3f2dfdc)、
+     `milestone/phase1-follow`(6503a13)、`milestone/phase2-overtake`(897a07e)。
+     模型等大数据不进版本库，用 tag + 目录归档。
+  3. **results 目录规范**: `results/YYYYMMDD_<实验名>/`，每目录含
+     `config.json`（seed/timesteps/n_envs/load_from/超参）、`eval_*.txt`（原始
+     输出）、`train_*.log`、`fig_*.png`（版本化命名）。
+  4. **checkpoint 命名**: `<任务>_<阶段>_v<N>.zip`，禁止裸名覆盖；训练结束后
+     立即将 SB3 裸名 best/final 复制为版本化归档名（见清单）。
+  5. **规范文档**: 新增 `DATA_MANAGEMENT.md`（目录/命名/归档/复现/tag 规范 +
+     铁律 4 合规核对表）。
+- **checkpoint 清单（归档后）**:
+
+  | 文件 | 大小 | 说明 |
+  |---|---|---|
+  | ckpt/follow_stage1_v1.zip | 452183 | 跟车 stage1 best |
+  | ckpt/follow_stage1_final_v1.zip | 452198 | 跟车 stage1 final |
+  | ckpt/follow_stage2_best_v1.zip | 452377 | 跟车 stage2 best（评估 1.00cm） |
+  | ckpt/follow_stage2_final_v1.zip | 452390 | 跟车 stage2 final（评估 0.93cm） |
+  | ckpt_ot/overtake_bc_v1.zip | 160263 | BC 热身（2/10） |
+  | ckpt_ot/overtake_best_v1.zip | 460314 | 超车 best（0/10 跟随，论文 5.7） |
+  | ckpt_ot/overtake_final_v1.zip | 460319 | 超车 final（10/10 采用） |
+
+- **原始数据归档路径**:
+  - `results/20260919_phase0_healthcheck/`（健康检查）
+  - `results/20260919_phase1_follow/`（18 个文件：4 评估 txt + 2 训练 log + 6 图 + config）
+  - `results/20260919_phase2_overtake/`（14 个文件：6 评估 txt + 2 训练 log + 6 图 + config）
+- **验收结论**: 规范建立并落地；Phase 1/2 全部产物已按规范归档 ✅
+- **与论文基准差异**: N/A（管理阶段）
+- **遗留问题**: 论文版面图（fig1/2/3/4/7/8）为前轮生成，本轮新增真实曲线图将
+  在 Phase 4 统一版本化命名并建索引。
+- **下一步**: Phase 4 撰写完整项目报告
+
+---
