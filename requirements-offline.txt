@@ -1,0 +1,12 @@
+# Offline-RL (RQ2) dependencies — SEPARATE venv, do NOT install into .venv
+#
+# WHY SEPARATE: d3rlpy pins gymnasium==1.0.0, which would DOWNGRADE the frozen
+# main environment's gymnasium 1.3.0 and invalidate the sha256 freeze records
+# (DATA_MANAGEMENT.md §8). Offline training reads demos_v1.npz read-only here;
+# only evaluation touches the env, and it does so inside THIS venv.
+#
+# Create:  uv venv .venv-d3rlpy --python 3.13
+#          uv pip install --python .venv-d3rlpy/bin/python -r requirements-offline.txt
+d3rlpy==2.8.1
+numpy
+# gymnasium / torch / matplotlib come as d3rlpy transitive deps

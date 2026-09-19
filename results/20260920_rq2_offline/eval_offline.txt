@@ -1,0 +1,7 @@
+=== RQ2 offline RL eval (10 seeds 2000-2009, five-reason audit) ===
+# nominal
+iql    d=300 dr=False: success=10/10 collision=0 offtrack=0 lost=0 failed=0 t_ot=2.0s mean_v=0.55
+td3bc  d=300 dr=False: success=10/10 collision=0 offtrack=0 lost=0 failed=0 t_ot=1.7s mean_v=0.61
+# domain-randomized
+iql    d=300 dr=True: success=10/10 collision=0 offtrack=0 lost=0 failed=0 t_ot=2.0s mean_v=0.54
+td3bc  d=300 dr=True: success=10/10 collision=0 offtrack=0 lost=0 failed=0 t_ot=1.7s mean_v=0.61

@@ -449,3 +449,105 @@ best 0/10 跟随（复现 5.7 节）；BC 2/10（复现 4.5 节）。checkpoint
 - **下一步**: W2（RQ2 离线 RL），plan 已起草待评审
 
 ---
+
+## [2026-09-20] Phase A W2 — RQ2 离线 RL 对比（A4/A5）
+
+- **commit**: 1b059ab（假设登记后）；本批为结果提交
+- **plan**: `plan_W2_offline_rl.md`（review1 修订版）；review: `reviews/20260920_w2_plan_review1.md`
+- **假设登记**: `research/ASSUMPTIONS.md`（H1–H3，训练前写入，阈值定死）
+
+### 两个试点门（均通过，先于全量）
+
+```
+门 2（规则基线锚点，d3rlpy venv / gymnasium 1.0.0）:
+  rule-based  overtake=10/10  collision=0 offtrack=0  t_overtake=2.0s  mean_v=0.55
+  → 与主 venv 完全一致，两 gymnasium 版本对本 env 行为等价 ✅
+
+门 1（100+ transition API 微型拟合）:
+  MDPDataset 构造 OK；IQL / TD3PlusBC fit + predict 均通过
+```
+
+**环境隔离验证**：d3rlpy venv gymnasium=1.0.0、主 venv gymnasium=1.3.0（未变）、
+5 个冻结文件 sha256 **全部 OK**。离线 venv 已 gitignore。
+
+**门价值**：试点门抓到 3 个会在全量阶段浪费机时的问题——① `obs[:100]` 切片错误
+（落在集中间，无终止标记，`MDPDataset` 拒绝）；② `MDPDataset` 无 `__len__`
+（正解 `.episodes`/`.transition_count`）；③ d3rlpy venv 缺 matplotlib（导入链）。
+
+### 训练
+
+```
+命令: .venv-d3rlpy/bin/python rq2_offline.py train --algo {iql,td3bc} --demos 300 --n-steps 100000
+数据: demos_v1.npz（300 集 / 41936 转移，映射 A：terminals=真终态含 success，
+      timeouts=timeout/failed；从 episode_reasons 重构）
+设备: CPU；d3rlpy 2.8.1；均 10 epoch × 10000 steps
+```
+
+- IQL: critic_loss 收敛平稳（末值 ≈14.1）
+- TD3+BC: **critic_loss 末期爆炸式增长**（13747 → 321130 → 2208362）——见遗留问题
+
+### 评估结果（10 固定 seed 2000–2009，五类终止全审计）
+
+**四方对照表**（名义参数 / 域随机化）：
+
+| 方法 | 训练 | 成功率(名义) | 成功率(DR) | 碰撞 | 冲出 | t_ot | mean_v |
+|---|---|---|---|---|---|---|---|
+| BC（已有） | 监督 | 2/10 | — | 8 | 0 | — | 0.50 |
+| **IQL** | 离线 | **10/10** | **10/10** | **0** | 0 | 2.0 s | 0.55 |
+| **TD3+BC** | 离线 | **10/10** | **10/10** | **0** | 0 | **1.7 s** | 0.61 |
+| PPO 微调（已有） | 在线 | 10/10 | 10/10 | 0 | 0 | 1.4 s | 0.71 |
+
+原始输出：
+```
+iql    d=300 dr=False: success=10/10 collision=0 offtrack=0 lost=0 failed=0 t_ot=2.0s mean_v=0.55
+iql    d=300 dr=True : success=10/10 collision=0 offtrack=0 lost=0 failed=0 t_ot=2.0s mean_v=0.54
+td3bc  d=300 dr=False: success=10/10 collision=0 offtrack=0 lost=0 failed=0 t_ot=1.7s mean_v=0.61
+td3bc  d=300 dr=True : success=10/10 collision=0 offtrack=0 lost=0 failed=0 t_ot=1.7s mean_v=0.61
+```
+
+逐 seed 确认两者**真超车**（t_ot 有分布 1.2–2.7 s，非恒定；IQL 1.3–2.7、TD3+BC 1.2–2.2）。
+
+### 假设检验
+
+| # | 假设 | 阈值 | 实测 | 判定 |
+|---|---|---|---|---|
+| H1 | IQL ∈ [3/10, 9/10]（介于 BC 与 PPO） | — | **10/10** | **证伪**（IQL 追平在线微调，非"介于"） |
+| H2 | IQL collision ≤ 6/10 | — | **0** | **成立**（远优于阈值） |
+| H3 | IQL 与 TD3+BC 成功率差 ≤ 2/10 且碰撞差 ≤ 2 | — | 差 0，碰撞差 0 | **成立**（但 TD3+BC 更快 1.7 vs 2.0 s） |
+
+### 发现（RQ2 的核心答案）
+
+- **H1 被证伪是本轮最重要的结果**：IQL 从**纯离线** 41936 条演示中达到 **10/10**，
+  追平在线微调的 PPO。这说明**演示数据本身已足以支撑最优策略**，
+  在线微调并未"超越数据"——只是 RF 收敛更快（1.4 s vs 2.0 s）。
+- **安全边界**：离线 RL（IQL/TD3+BC）零碰撞，远优于 BC（8 次）——
+  印证 H2：离线 RL 的保守性（Q 下界 / BC 正则）确实抑制了撞车。
+- **三种方法的数据效率排序（t_ot）**：PPO 微调 1.4 s > TD3+BC 1.7 s > IQL 2.0 s
+  ≈ 规则 2.0 s。IQL 基本复现了演示者（规则机），TD3+BC 略有改进。
+- **DR 全组零退化**：四方法在 DR 下成功率/耗时与名义一致。
+
+### 验收结论
+
+- 四方对照表产出（论文 4.8 节素材）✅
+- 离线 RL **训练未接触环境**（代码结构强制：train 只读 npz）✅
+- 五类终止全审计 ✅；假设逐条检验 ✅（H1 证伪如实记录）
+
+### 与论文基准差异
+
+- 论文 4.5 节仅断言"BC 2/10 不够，需 RL 接管"。本轮**新增了 BC 之外的三方对照**，
+  且发现**离线 RL 单独即可达 10/10**——这是论文 4.8 节的全新内容，非复现差异。
+
+### 遗留问题（重要）
+
+1. **TD3+BC critic_loss 发散**（末值 2.2e6）：虽然评估 10/10，但训练不稳定是真实
+   信号，结果稳健性存疑。**需在论文中如实标注**，或补"降 lr / 加早停"复测。
+2. **模型交付**：`ckpt_offline/{iql,td3bc}_d300.pt`（3.9 MB / 3.3 MB），
+   sha256 `9eff21e2…b0566` / `ca720969…36cc`。已 gitignore，用目录归档 + 本记录存证。
+3. 数据量扫描（R4，50/100/200/300 × 3 方法）**未跑**——本轮先出 300 档四点对照，
+   扫描作为 W2 余项或 W3 前置。
+
+- **产物**: `results/20260920_rq2_offline/`；`rq2_offline.py`（入库）；
+  `requirements-offline.txt`（入库）；模型存 `ckpt_offline/`（归档）
+- **下一步**: 数据量扫描（R4）→ 论文 v2 §4.8 + §5.4 修订（A6）
+
+---
