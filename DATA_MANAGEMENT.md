@@ -98,3 +98,32 @@ uv run python train_ot.py eval --model ckpt_ot/final_model.zip -v --out results/
 
 > 注：论文附录 A 的 stage1 命令为 2,000,000 步，仅产生 244 次更新，**不满足
 > 铁律 4（≥300）**。本轮按铁律 4 上调至 2,500,000（305 次），其余命令不变。
+
+## 8. 代码文件哈希（环境冻结存证）
+
+以下 sha256 于 2026-09-19 复刻完成后在实际文件上计算（`sha256sum`），用于证明
+**本轮全部训练/评估所用代码与论文最终版逐字节一致**（铁律 2：环境冻结）。
+任何后续修改都会使哈希改变，届时按铁律 2 须在文件头注释版本号并**从头重训**。
+
+| 文件 | sha256 |
+|---|---|
+| `car_following_sim.py` | `bfb1678d7a5bb10c60632b54ee77d3d357ecce6b21a4c3f0384ecca9824bec89` |
+| `follow_env.py` | `941c447b969c2fa1f153ed57219235bc028f5ffa9e4052d341f92c97f91e4e2e` |
+| `overtake_env.py` | `78ee12dd9d5cc6b874f5f530cd6808c7d8895d1aa6677a79559fab1423526b98` |
+| `train_ppo.py` | `70136c0b761949662bba9ae8d4ceb246a390b7533a86bdf4cb5f21059aef38b9` |
+| `train_ot.py` | `8197daa0c20d469fe8b3aae48466e54f59c0790b647f3b6d8cd933aa0c28f4d1` |
+
+**核验命令**：
+
+```bash
+sha256sum -c <<'EOF'
+bfb1678d7a5bb10c60632b54ee77d3d357ecce6b21a4c3f0384ecca9824bec89  car_following_sim.py
+941c447b969c2fa1f153ed57219235bc028f5ffa9e4052d341f92c97f91e4e2e  follow_env.py
+78ee12dd9d5cc6b874f5f530cd6808c7d8895d1aa6677a79559fab1423526b98  overtake_env.py
+70136c0b761949662bba9ae8d4ceb246a390b7533a86bdf4cb5f21059aef38b9  train_ppo.py
+8197daa0c20d469fe8b3aae48466e54f59c0790b647f3b6d8cd933aa0c28f4d1  train_ot.py
+EOF
+```
+
+> 复刻开训前亦可用同一命令核对，确保所用代码未漂移（对应论文表 3 案例 8、
+> 12："沙箱与用户结果矛盾 = 文件版本不一致" / "环境持续漂移"）。

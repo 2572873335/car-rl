@@ -303,7 +303,8 @@ $$\tau \sim \mathcal{U}(0.08, 0.18)\ \text{s},\quad a_{max} \sim \mathcal{U}(1.0
 （0.47~2.01 cm），非平均数效应；（2）域随机化下几乎不退化
 （1.00→1.06 cm），说明学到的是对执行器不确定性不变的规律；
 （3）P 控制的 10/10 撞车量化了规则系统的脆弱性，恰是 1.2 节论点的
-直接证据。间距与速度对比曲线见图 5（请插入 `eval_compare.png`）。
+直接证据。间距与速度对比曲线见图 5（`figures_v2/图5_跟车对比_final_nominal_v1.png`，
+本轮真实评估产物）。
 
 ![图5 跟车任务对比](figures_v2/图5_跟车对比_final_nominal_v1.png)
 
@@ -331,9 +332,9 @@ $$\tau \sim \mathcal{U}(0.08, 0.18)\ \text{s},\quad a_{max} \sim \mathcal{U}(1.0
 零动作基线（$a_t \equiv 0$）代表"纯先验"策略：永不追尾（0 碰撞）但永远
 跟随慢车，任务失败。这印证了先验与 RL 的分工：**先验负责生存，RL 负责决策**。
 
-逐 seed 全部以 success 收官（71~102 步）。**RL 比手工状态机快 30%，
-且零失误**。对比曲线见图 6（请插入 `eval_overtake_final.png`，建议采用
-"规则超完回外圈"完整闭环版本；另一版本可放 GitHub README）。
+逐 seed 全部以 success 收官（1.1~1.6 s）。**RL 比手工状态机快 30%，
+且零失误**。对比曲线见图 6（`figures_v2/图6_超车对比_final_nominal_v1.png`，
+本轮真实评估产物）。
 
 ![图6 超车任务对比](figures_v2/图6_超车对比_final_nominal_v1.png)
 
@@ -506,9 +507,9 @@ LfD 管线（4.5 节）解决。该案例说明：当行为发现比行为优化
 uv run python train_ot.py eval --rule-only
 
 # 1. 跟车任务（两阶段课程）
-uv run python train_ppo.py train --easy --timesteps 2000000
+uv run python train_ppo.py train --easy --timesteps 2500000   # [1]
 uv run python train_ppo.py train --timesteps 5000000 --load ckpt/best_model.zip
-uv run python train_ppo.py eval --model ckpt/best_model.zip --domain-randomize -v
+uv run python train_ppo.py eval --model ckpt/final_model.zip --domain-randomize -v
 
 # 2. 超车任务（BC 热身 + 微调）
 uv run python train_ot.py pretrain --n-demos 300 --bc-epochs 10
@@ -519,6 +520,10 @@ uv run python train_ot.py eval --model ckpt_ot/final_model.zip -v   # 注意用 
 # 3. 训练监控
 uv run tensorboard --logdir tb_logs     # 跟车  /  tb_logs_ot（超车）
 ```
+
+> **[1]** 论文初版此处为 `--timesteps 2000000`（仅 244 次梯度更新，不满足
+> "更新次数 ≥ 300"的工程铁律），本轮复刻修正为 **2500000** 步（= 305 次更新）。
+> 详见正文 **9.4 节**（更新次数合规表）及 `RUNLOG.md` Phase 1 条目。
 
 **预期结果**：跟车 1.0 cm 级误差零碰撞；超车 10/10 success、t_ot ≈ 1.4 s。
 训练曲线特征：跟车 ep_len 上升至 1000；超车 ep_len 从 129 降至 ~86。
@@ -561,13 +566,20 @@ uv run tensorboard --logdir tb_logs     # 跟车  /  tb_logs_ot（超车）
 
 ---
 
-> **插图清单**（供排版时核对）：
-> 图 1 系统架构（figures_v2/图1_系统架构_v1.png）　图 2 赛道几何（fig2_track.png）
-> 图 3 RL 循环与分层控制（fig3_rl_loop.png）　图 4 LfD 管线（fig4_pipeline.png）
-> 图 5 跟车对比【请插入你的 eval_compare.png】
-> 图 6 超车对比【请插入 eval_overtake_final.png，采用"规则超完回外圈"版本；另一版放 GitHub README】
-> 图 7 训练曲线（fig7_training_curves.png）　图 8 奖励地形示意（fig8_landscape.png）
-> 图 9 域随机化超车对比（eval_overtake_dr.png，置于 5.4 节）
+> **插图清单**（供排版时核对，路径统一为 `figures_v2/` 实际文件名）：
+> 图 1 系统架构（`figures_v2/图1_系统架构_v1.png`）
+> 图 2 赛道几何（`figures_v2/图2_赛道几何_v1.png`）
+> 图 3 RL 循环与分层控制（`figures_v2/图3_RL循环与分层控制_v1.png`）
+> 图 4 LfD 管线（`figures_v2/图4_LfD管线_v1.png`）
+> 图 5 跟车对比（`figures_v2/图5_跟车对比_final_nominal_v1.png`）
+> 图 6 超车对比（`figures_v2/图6_超车对比_final_nominal_v1.png`）
+> 图 7 超车训练曲线（`figures_v2/图7_超车训练曲线_v1.png`）
+> 图 8 奖励地形示意（`figures_v2/图8_奖励地形_v1.png`）
+> 图 9 域随机化超车对比（`figures_v2/图9_超车域随机化_v1.png`）
+> 图 10 跟车训练曲线 stage1（`figures_v2/图10_跟车训练曲线_stage1_v1.png`）
+> 图 11 跟车训练曲线 stage2（`figures_v2/图11_跟车训练曲线_stage2_v1.png`）
+> 图 12 best 模型评估（`figures_v2/图12_best模型评估_0_10_v1.png`）
+> 图 13 BC 策略评估（`figures_v2/图13_BC策略评估_2_10_v1.png`）
 
 ---
 
@@ -644,17 +656,28 @@ rule-based   overtake=10/10  collision=0  offtrack=0  lost=0  t_overtake=  2.0s 
 
 ### 10.1 训练曲线（真实 stdout 解析）
 
-两阶段课程的真实曲线（图 10、图 11）：
+两阶段课程的真实曲线（图 10、图 11）。下表的四个数值与图中曲线**逐点对应、
+口径统一**——均取自 `make_curves.py` 对训练 stdout 的完整解析（stage1 306 点、
+stage2 611 点），**"早期极值"是曲线上的真实谷值，"稳定段"为末 10% 点的均值**：
 
-| 阶段 | 步数 | ep_len_mean | ep_rew_mean | 更新次数 |
+| 阶段 | 步数 | ep_len_mean<br>（首点/早期极值/稳定段） | ep_rew_mean<br>（首点/早期极值/稳定段） | 更新次数 |
 |---|---|---|---|---|
-| stage1 (easy) | 2.5 M | 145 → **1000** | −729 → −88 | 305 |
-| stage2 (full) | 5 M | 94 → **974** | −2650 → −910 | 610 |
+| stage1 (easy) | 2.5 M | 145 / — / **1000** | −729 / **−5000**(@0.03 M) / **−86** | 305 |
+| stage2 (full) | 5 M | 94 / — / **989** | −2650 / −2650(@0.01 M) / **−864** | 610 |
 
-**读法**：stage1 末尾回合长度升至 1000（= `t_max=20 s / DT=0.02 s` 的满回合），
-说明策略已学会**全程不碰撞**；stage2 从 easy 切换到完整任务（新增急刹前车、
-更大初始间距）时 ep_len 骤降至 94（初期撞车），随后回升至 974——**"先学安全"
-的曲线指纹**与论文 5.5 节描述一致。
+> 口径说明（对应图 10、图 11 两条曲线）：
+> - **ep_len_mean 首点**即 sb3 第一次 rollout 后的记录值（stage1 145、stage2 94），
+>   非"最终值"；其"早期极值"无独立谷底（单调上升），故记 "—"。
+> - **ep_rew_mean 首点**同为第一次记录（stage1 −729、stage2 −2650）；
+>   **早期极值**是曲线在训练最早期出现的真实最低点（stage1 于 0.03 M 处跌至
+>   **−5000** 后回升，stage2 首点即最低 −2650）；**稳定段**为末 10% 点均值
+>   （stage1 −86、stage2 −864），与曲线末端的平台一致。
+
+**读法**：stage1 稳定段回合长度收敛到 1000（= `t_max=20 s / DT=0.02 s` 的满
+回合），说明策略已学会**全程不碰撞**；stage2 从 easy 切换到完整任务（新增急刹
+前车、更大初始间距）时 ep_len 首点骤降至 94、回报跌至 −2650（初期剧烈撞车），
+随后回升至稳定段 989——**"先学安全"的曲线指纹**与论文 5.5 节描述一致。
+stage1 早期 −5000 的深谷同属此瞬态：课程首轮尚未见过任何工况，属于正常起始。
 
 ### 10.2 表 1 复现对照
 
@@ -695,6 +718,14 @@ RL 逐 seed（final，名义）：0.57 / 0.73 / 0.57 / 0.71 / 0.73 / 0.79 / 0.86
 **域随机化不退化验证**：RL 1.00→1.06 cm（退化 6%），P+FF 1.93→1.94 cm。
 两者均证明学到的是**对执行器不确定性不变的规律**（论文 4.6 节论断复现）。
 
+**checkpoint 偏置在跟车任务中的复现（呼应 5.7 节）**：本任务 RL 的
+**final（0.93 cm）优于 best（1.00 cm）**——与超车任务完全同向（超车 final 10/10
+vs best 0/10，见 11.4）。这说明 5.7 节的"checkpoint 偏置"**并非超车任务的
+特例，而是跨任务的普遍现象**：只要回合总回报被回合长度（或回合早期瞬态）偏置，
+按平均回报保存的 best 就未必是任务指标最优的策略。因此**铁律 6 的 best/final
+双测在两类任务上都是必需的**，checkpoint 选择指标必须与任务目标（间距误差 /
+成功率）对齐，而非回合总回报。
+
 ## 11. 超车任务复刻结果
 
 ### 11.1 LfD 管线三步复现
@@ -719,8 +750,11 @@ rule-based   overtake=10/10  collision=0   offtrack=0  lost=0  t_overtake= 2.0s 
 RL(PPO)      overtake= 2/10  collision=8   offtrack=0  lost=0  t_overtake= 2.2s  mean_v=0.50 m/s
 ```
 
-**完全复现论文 4.5 节的"2/10 成功、8 次碰撞"**。这印证了 LfD 范式的关键论断：
-**BC 的模仿精度无需完美，只要"会尝试"，RL 接管后即可修复时机。**
+**完全复现论文 4.5 节的"2/10 成功、8 次碰撞"**（逐 seed 轨迹见图 13）。这印证了
+LfD 范式的关键论断：**BC 的模仿精度无需完美，只要"会尝试"，RL 接管后即可修复
+时机。**
+
+![图13 BC 策略评估（2/10 成功、8 次碰撞）](figures_v2/图13_BC策略评估_2_10_v1.png)
 
 **③ PPO 微调**（5 M 步，从 bc_model 续训）：
 
@@ -776,6 +810,11 @@ RL(PPO)      overtake=0/10  collision=0  offtrack=0  lost=0  t_overtake= nans  m
 # final_model 名义参数
 RL(PPO)      overtake=10/10  collision=0  offtrack=0  lost=0  t_overtake=  1.4s  mean_v=0.71 m/s
 ```
+
+best 与 final 的评估轨迹对比见图 12——best 的进度差曲线全程贴零（跟随），
+final 则迅速抬升并稳定在正值区（成功反超）。
+
+![图12 best 模型评估（0/10、全部 failed、mean_v=0.23 跟随）](figures_v2/图12_best模型评估_0_10_v1.png)
 
 **best_model = 0/10，且 `mean_v=0.23 m/s` 恰等于领头车速度**——即 best 学到的是
 **"零动作"的纯跟随策略**（$a_t\equiv 0$）。这与论文 5.7 节所述
