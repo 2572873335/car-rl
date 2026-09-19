@@ -1,0 +1,20 @@
+# --- python / venv ---
+.venv/
+__pycache__/
+*.pyc
+
+# --- training artifacts (large / regenerable) ---
+tb_logs*/
+*.zip
+*.npz
+
+# --- generated figures at repo root (kept under results/ instead) ---
+/*.png
+week1_sim_result.png
+
+# --- windows metadata leaked through the WSL mount ---
+*:Zone.Identifier
+
+# --- editor ---
+.vscode/
+.idea/
