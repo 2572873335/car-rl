@@ -15,13 +15,28 @@
 
 ## 1. 假设登记（先写后验，进 research/ASSUMPTIONS.md）
 
-| # | 假设 | 若成立的含义 | 若被证伪的含义 |
-|---|---|---|---|
-| H1 | IQL 成功率落在 BC(2/10) 与 PPO(10/10) **之间** | 离线 RL 能从纯演示中提取超出模仿的策略 | 离线 RL 未超越模仿 → 数据覆盖不足 |
-| H2 | IQL 碰撞数 **< BC 的 8 次** | 离线 RL 的保守性（Q 下界）抑制撞车 | 保守性未体现，需查实现/超参 |
-| H3 | TD3+BC 与 IQL **同档**（成功率相差 ≤2/10） | 换算法不影响结论，结论稳健 | 结论算法依赖，需报告两者差异并解释 |
+**R5 修订——判定阈值前置**（避免事后"差不多就算"的弹性解释）：
+
+| # | 假设 | 判定阈值（训练前定死） | 若成立 | 若被证伪 |
+|---|---|---|---|---|
+| H1 | IQL 成功率**介于** BC(2/10) 与 PPO(10/10) 之间 | IQL ∈ **[3/10, 9/10]** | 离线 RL 从纯演示提取超出模仿的策略 | 未超越模仿 → 数据覆盖不足 |
+| H2 | IQL 碰撞数 **< BC 的 8 次** | collision **≤ 6/10** | 离线 RL 保守性抑制撞车 | 保守性未体现，查实现/超参 |
+| H3 | TD3+BC 与 IQL **同档** | 成功率差 **≤ 2/10** 且碰撞差 ≤ 2 | 换算法不影响结论，结论稳健 | 结论算法依赖，报告差异并解释 |
 
 > 登记表同时在 `research/ASSUMPTIONS.md` 留档，**训练前**写入。
+> 阈值训练前定死；结果落在边界则**补 seed 确认**，不放宽阈值。
+
+**R3 裁决——算法范围**：IQL + TD3+BC **足够**。CQL 仅在"确认支持连续动作"
+前提下做第三算法，**限时 30 分钟**，查不到即丢。
+
+**R4 裁决——数据量扫描做全 4 点**（50/100/200/300 × {BC, IQL, TD3+BC}）。
+**约束：每个数据点的 BC 必须重新训练**（不得复用 300-demo 的 BC 结果）。
+
+**R2 裁决——评估在 d3rlpy venv 内做，加"规则基线锚点门"**：
+不跨 venv 序列化。评估脚本在 d3rlpy venv 内直接 `import overtake_env`
+（源码共享、解释器不同）。**锚点门**：先在 d3rlpy venv（gymnasium 1.0.0）里
+跑**规则基线**评估，须复现 **10/10、2.0s**——复现则两版本对本 env 行为等价；
+否则回退 state_dict 导出方案。
 
 ## 2. 算法与库选型（**已实测确认，非推测**）
 
@@ -39,20 +54,50 @@
 
 ## 3. 数据映射（映射 A：goal-as-terminal）
 
-按 `export_demos.py` docstring 的**映射 A** 构造 `MDPDataset`：
+**R1 修订（评审拦截级）——npz 实际字段（已实测核实，非推测）**：
 
 ```
-terminals  = terminated | success      # 真 MDP 终态（含成功）
-timeouts   = truncated | timeout | failed  # 时间限制截断（非真终态）
+observations(41936,6) actions(41936,2) rewards(41936,)
+next_observations(41936,6)
+terminals(41936,) bool   = 逐步 (terminated | truncated)
+timeouts(41936,)  bool   = 逐步 truncated
+episode_ends(300,) episode_reasons(300,) episode_seeds(300,)
+episode_terminals(41936,) bool
 ```
 
-**理由**：成功是真·终态（任务完成），超时/失败是时间限制截断，二者必须区分——
-否则 Q 值会在"超时"处错误地认为后续无价值，污染回报估计。
-`export_demos.py` 已按此语义输出 `terminals`（terminated|truncated）与
-`timeouts`（truncated）；**构造时需重算**：`terminals = (reason != timeout/failed)`。
+**关键陷阱（必须重算，不能直传）**：本 env 把 `success` 报成
+`truncated=True`（`overtake_env.py:265`），因此
+- npz 的 `timeouts` 字段 = **300**（每集末尾一个 True），
+- 而映射 A 要求成功集 `timeouts=0`。
 
-字段对应（实测 MDPDataset 签名）：
+→ **直传 npz 的 `terminals`/`timeouts` 给 `MDPDataset` 是错的**。
+（注：npz **未**单独存逐步 `terminated`/`truncated`；原始信息只在
+`episode_reasons` 里，故必须由此重构。）
+
+**正确构造（已实测，产出 terminals=300 / timeouts=0）**：
+
+```python
+TRUE_TERM = {"collision", "offtrack", "lost", "success"}   # 映射 A：成功=真终态
+terminals = np.zeros(n, bool)
+timeouts  = np.zeros(n, bool)
+for end, reason in zip(d["episode_ends"], d["episode_reasons"]):
+    if str(reason) in TRUE_TERM:
+        terminals[end] = True
+    else:                      # timeout / failed = 时间限制截断
+        timeouts[end] = True
+dataset = MDPDataset(observations, actions, rewards, terminals, timeouts=timeouts)
+```
+
+**理由**：`collision/offtrack/lost` 是坏的终止，`success` 是目标达成的真终态；
+`timeout/failed` 才是时间限制截断。二者在 Q 值 bootstrap 上处理不同，
+必须区分，否则回报估计被污染。
+字段顺序与实测 `MDPDataset` 签名一致：
 `MDPDataset(observations, actions, rewards, terminals, timeouts=...)`。
+
+> **附带改进项（可选）**：`export_demos.py` 采集时算了 `term_buf`（逐步
+> terminated）但未存入 npz。若将来采集含失败轨迹的数据集，应补存原始
+> `terminated`/`truncated` 以免依赖 `episode_reasons` 重构。当前数据集
+> （全 success）不受影响。**本轮不改**（改则须重跑 + 重算 sha256）。
 
 ## 4. 评估协议（**与论文完全对齐——评审重点盯此条**）
 
@@ -121,9 +166,43 @@ RQ2 问的是"**数据效率**"，单点(300 demos)只能答"谁最好"。增加
 - 假设登记：`research/ASSUMPTIONS.md`
 - 论文素材：§4.8 新增 + §5.4 修订（A6）
 
-## 待评审确认点
+## 待评审确认点（**已裁决，见 §1 / §11**）
 
-1. 算法：IQL + TD3+BC 为主，CQL 可选第三 —— 是否够？
-2. 数据量扫描（§7）是否本轮做，还是降级为两点？
-3. 评估 harness：复用主 venv 的 SF3 脚本加载 d3rlpy 模型，还是 d3rlpy 侧单独写
-   评估（需要跨 venv 的模型序列化考虑）？
+1. ~~算法~~ → **R3：IQL + TD3+BC 足够**（CQL 限时 30 分钟可选）
+2. ~~数据量扫描~~ → **R4：做全 4 点**，每点 BC 重训
+3. ~~评估 harness~~ → **R2：d3rlpy venv 内评估 + 规则基线锚点门**
+
+## 11. 评审裁决汇总（review1，2026-09-20）
+
+| 项 | 裁决 | 处理 |
+|---|---|---|
+| R1 | §3 数据映射描述错误（**拦截级**） | 已实测核实并重写 §3（见下"R1 事实澄清"） |
+| R2 | 评估放 d3rlpy venv + 锚点门 | 已写入 §1 / §3 |
+| R3 | IQL + TD3+BC 足够 | 已写入 §1 |
+| R4 | 数据量扫描全 4 点 | 已写入 §1 / §7 |
+| R5 | 假设加判定阈值 | 已写入 §1 |
+
+**R1 事实澄清（实测）**：评审 R1 的**结论正确**（不能直传 npz 字段），
+但其对 npz 的描述需精确化——npz **确实有** `terminals`/`timeouts` 字段，
+只是**语义不对**（`timeouts`=300，因 env 把 success 报成 truncated）；
+npz **没有** 逐步 `terminated`/`truncated`/`success` 原始数组。
+正解：从 `episode_reasons` 重构（已实测 → terminals=300, timeouts=0）。
+详见 §3。
+
+**结论**：Approve with amendments，按 R1–R5 修订后执行。
+顺序：改 plan §3/R5 ✅ → **两个试点门并行**（100-transition API 门 +
+d3rlpy venv 规则基线锚点门）→ 全量训练 → 数据量扫描 → 评估归档。
+
+**流程价值**：这是评审流程第二次在动手前拦截真问题（首次= sb3-contrib 无离线 RL）。
+R1 若带入执行，会在 `MDPDataset` 构造处炸出，且排查方向大概率被误导到库版本上。
+
+## 12. 时间预算（更新）
+
+| 项 | 估计 |
+|---|---|
+| d3rlpy 独立 venv + **两个试点门** | 0.5 天 |
+| 数据映射 + 训练脚本（IQL/TD3+BC） | 0.5 天 |
+| 四方评估（10 seed × 2 组 × 3 方法）+ 归档 | 1 天 |
+| 数据量扫描（50/100/200/300 × 3 方法，BC 重训） | 1 天 |
+| 论文 v2 §4.8 草拟 + 5.4 修订 | 1 天 |
+| **合计** | **~4 天（W2 一周内）** |
