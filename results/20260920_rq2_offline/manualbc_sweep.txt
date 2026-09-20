@@ -1,0 +1,7 @@
+=== manual-BC nested-subset sweep (H6) ===
+# exact pretrain hyperparams (MLP 128x128, Adam lr=1e-3, 10ep, batch 8192)
+# nested subsets of demos_v1.npz, eval seeds 2000-2009
+MANUALBC d= 50: success=0/10  collision=10  t_ot=nans  -> ckpt_offline/manualbc_d50.zip
+MANUALBC d=100: success=0/10  collision=10  t_ot=nans  -> ckpt_offline/manualbc_d100.zip
+MANUALBC d=200: success=0/10  collision=10  t_ot=nans  -> ckpt_offline/manualbc_d200.zip
+MANUALBC d=300: success=2/10  collision=8  t_ot=2.2s  -> ckpt_offline/manualbc_d300.zip

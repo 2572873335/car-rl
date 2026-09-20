@@ -62,12 +62,19 @@ def make_dataset(obs, act, rew, terminals, timeouts):
 
 
 # ---------------------------------------------------------------- algos ----
-def make_algo(name, device="cpu"):
-    from d3rlpy.algos import IQLConfig, TD3PlusBCConfig
+def make_algo(name, device="cpu", critic_lr=None, actor_lr=None):
+    from d3rlpy.algos import IQLConfig, TD3PlusBCConfig, BCConfig
+    kw = {}
+    if critic_lr is not None:
+        kw["critic_learning_rate"] = critic_lr
+    if actor_lr is not None:
+        kw["actor_learning_rate"] = actor_lr
     if name == "iql":
-        return IQLConfig().create(device=device)
+        return IQLConfig(**kw).create(device=device)
     if name in ("td3bc", "td3+bc"):
-        return TD3PlusBCConfig().create(device=device)
+        return TD3PlusBCConfig(**kw).create(device=device)
+    if name == "bc":
+        return BCConfig().create(device=device)
     raise ValueError(f"unknown algo {name}")
 
 
@@ -99,36 +106,46 @@ def gate():
 
 
 # ----------------------------------------------------------------- train ---
-def train(algo_name, n_episodes, n_steps, device="cpu"):
+def _ckpt_path(algo_name, n_episodes, tag=None):
+    name = f"{algo_name}_d{n_episodes}" + (f"_{tag}" if tag else "") + ".pt"
+    return os.path.join(CKPT_DIR, name)
+
+
+def train(algo_name, n_episodes, n_steps, device="cpu", tag=None,
+          critic_lr=None, actor_lr=None):
+    """tag: checkpoint label so retests (e.g. lr-half) don't clobber the
+    original run. critic_lr/actor_lr: override for stability retests."""
     obs, act, rew, term, tout = load_demos(max_episodes=n_episodes)
     ds = make_dataset(obs, act, rew, term, tout)
     print(f"train {algo_name}: {n_episodes} episodes, {len(obs)} transitions, "
-          f"n_steps={n_steps}")
-    algo = make_algo(algo_name, device=device)
+          f"n_steps={n_steps}, critic_lr={critic_lr}, tag={tag}")
+    algo = make_algo(algo_name, device=device, critic_lr=critic_lr,
+                     actor_lr=actor_lr)
     algo.fit(ds, n_steps=n_steps)
     os.makedirs(CKPT_DIR, exist_ok=True)
-    path = os.path.join(CKPT_DIR, f"{algo_name}_d{n_episodes}.pt")
+    path = _ckpt_path(algo_name, n_episodes, tag)
     algo.save(path)
     print(f"saved -> {path}")
     return path
 
 
-def load_algo(algo_name, n_episodes, device="cpu"):
-    """Load a saved offline model. d3rlpy 2.x: models have no .load() classmethod;
-    the top-level d3rlpy.load_learnable rehydrates config+weights."""
+def load_algo(algo_name, n_episodes, device="cpu", tag=None):
+    """d3rlpy 2.x: models have no .load() classmethod; the top-level
+    d3rlpy.load_learnable rehydrates config+weights."""
     import d3rlpy
-    path = os.path.join(CKPT_DIR, f"{algo_name}_d{n_episodes}.pt")
+    path = _ckpt_path(algo_name, n_episodes, tag)
     if not os.path.exists(path):
         raise FileNotFoundError(f"{path} not found; train first")
     return d3rlpy.load_learnable(path, device=device)
 
 
 # ------------------------------------------------------------------ eval ---
-def eval_algo(algo_name, n_episodes, seeds=EVAL_SEEDS, dr=False, device="cpu"):
+def eval_algo(algo_name, n_episodes, seeds=EVAL_SEEDS, dr=False, device="cpu",
+              tag=None):
     """Roll out the offline policy in the env. This is the ONLY place that
     touches the env -- training never does (RQ2 offline claim)."""
     from overtake_env import OvertakeEnv
-    algo = load_algo(algo_name, n_episodes, device=device)
+    algo = load_algo(algo_name, n_episodes, device=device, tag=tag)
 
     rows = []
     for s in seeds:
@@ -174,21 +191,43 @@ def main():
     pt.add_argument("--demos", type=int, required=True)
     pt.add_argument("--n-steps", type=int, default=100_000)
     pt.add_argument("--device", default="cpu")
-    pt.set_defaults(func=lambda a: train(a.algo, a.demos, a.n_steps, a.device))
+    pt.add_argument("--tag", default=None, help="ckpt label (retests)")
+    pt.add_argument("--critic-lr", type=float, default=None)
+    pt.add_argument("--actor-lr", type=float, default=None)
+    pt.set_defaults(func=lambda a: train(a.algo, a.demos, a.n_steps, a.device,
+                                         a.tag, a.critic_lr, a.actor_lr))
 
     pe = sub.add_parser("eval")
     pe.add_argument("--algo", required=True)
     pe.add_argument("--demos", type=int, required=True)
     pe.add_argument("--domain-randomize", action="store_true")
     pe.add_argument("--device", default="cpu")
+    pe.add_argument("--tag", default=None)
+    pe.add_argument("--seeds", type=int, nargs="*", default=None)
     def _eval(a):
-        rows = eval_algo(a.algo, a.demos, dr=a.domain_randomize, device=a.device)
+        rows = eval_algo(a.algo, a.demos, seeds=a.seeds or EVAL_SEEDS,
+                         dr=a.domain_randomize, device=a.device, tag=a.tag)
         s = summarize_eval(rows)
-        print(f"{a.algo:6s} d={a.demos:3d} dr={a.domain_randomize}: "
-              f"success={s['success']} collision={s['collision']} "
+        print(f"{a.algo:6s} d={a.demos:3d} dr={a.domain_randomize} "
+              f"tag={a.tag}: success={s['success']} collision={s['collision']} "
               f"offtrack={s['offtrack']} lost={s['lost']} failed={s['failed']} "
               f"t_ot={s['t_ot']:.1f}s mean_v={s['mean_v']:.2f}")
     pe.set_defaults(func=_eval)
+
+    ps = sub.add_parser("sweep")
+    ps.add_argument("--algos", nargs="*", default=["iql", "td3bc"])
+    ps.add_argument("--n-list", type=int, nargs="*",
+                    default=[50, 100, 200, 300])
+    ps.add_argument("--n-steps", type=int, default=100_000)
+    def _sweep(a):
+        for al in a.algos:
+            for n in a.n_list:
+                train(al, n, a.n_steps)
+                rows = eval_algo(al, n)
+                s = summarize_eval(rows)
+                print(f"SWEEP {al:6s} d={n:3d}: success={s['success']} "
+                      f"collision={s['collision']} t_ot={s['t_ot']:.1f}s")
+    ps.set_defaults(func=_sweep)
 
     args = ap.parse_args()
     args.func(args)
