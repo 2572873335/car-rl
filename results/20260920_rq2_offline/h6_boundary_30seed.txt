@@ -1,0 +1,8 @@
+=== H6 boundary check: manual-BC at 30 seeds (seeds 2000-2029) ===
+# gen: h6_ext.py (main venv), reuses ckpt_offline/manualbc_d*.zip
+H6EXT d= 50: success=0/30 collision=30 t_ot=nans
+H6EXT d=100: success=0/30 collision=30 t_ot=nans
+H6EXT d=200: success=0/30 collision=30 t_ot=nans
+H6EXT d=300: success=5/30 collision=25 t_ot=2.3s
+H6 verdict (30-seed): max=5/30 min=0/30 spread=5/30 (threshold <=2/10 => 6/30)
+H6 holds at 30 seeds: True
