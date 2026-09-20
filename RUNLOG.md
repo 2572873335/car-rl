@@ -594,3 +594,64 @@ td3bc  d=300 dr=True : success=10/10 collision=0 offtrack=0 lost=0 failed=0 t_ot
 - **下一步**: 报告评审 → 开源发布（Phase B）或收尾
 
 ---
+
+## [2026-09-20] Phase B W3 — 仓库公开化与发布
+
+- **commit**: da6da2c（README/CITATION）、84342bd（Makefile）
+- **目标**: 仓库公开，建立社区基线（roadmap Phase B W3，零新实验，纯包装）
+
+### 执行内容
+
+| 任务 | 结果 |
+|---|---|
+| B1 README 重写 | ✅ AGV 双重叙事、11/11 复刻徽章、结果表、快速开始、仓库结构、评估协议说明 |
+| B2 叙事包装 | ✅ 双叙事分层：AGV（应用域）与 TI 杯（出处）**均为真**，README 显式说明二者指同一系统 |
+| B3 一键运行 | ✅ `Makefile`（`make check` / `demo` / `reproduce`）；`make demo` **实测跑通**（~5 min 全流程，短步数 smoke test） |
+| B4 发布 checklist | ✅ LICENSE(MIT) 已有；✅ 新增 CITATION.cff；✅ `.gitignore` 含 `!demos_v1.npz` 例外；✅ Release v1.0.0 + 3 资产 |
+
+### Release v1.0.0
+
+- **URL**: https://github.com/2572873335/car-rl/releases/tag/v1.0.0
+- **仓库可见性**: **public** ✅
+- **资产**（GitHub 端 sha256 与本地逐一吻合，证明上传无损）:
+
+  | 资产 | 大小 | sha256 |
+  |---|---|---|
+  | follow_stage2_final_v1.zip | 452390 | `4231a613…9caa2` ✅ |
+  | overtake_final_v1.zip | 460319 | `ebf0b792…62f12` ✅ |
+  | demos_v1.npz | 1383277 | `4b31c47e…f429` ✅ |
+
+- **tag**: `v1.0.0`（指向 main）；另有里程碑 tag `milestone/phaseA-results`
+
+### 推送记录
+
+```
+20bfafc..27ee67d  main -> main   (Phase A: 17 commits)
+27ee67d..84342bd  main -> main   (Phase B W3)
+milestone/phaseA-results (new tag)
+v1.0.0 (release tag, created via API)
+```
+
+### 网络处置（环境问题，非项目内容）
+
+WSL 的 `github.com`/`api.github.com` 被 Windows 侧 GitHub 加速工具经
+hosts 污染至 `127.0.0.1`。处置：git 走 SSH over 443（`ssh.github.com`，
+不依赖 hosts）；Release 经加速器网关 `172.23.192.1` + `curl -k` 调 API 完成
+（gh CLI 因加速器自签证书无法用）。**临时 hosts 映射已从备份还原**，
+WSL 恢复原状。
+
+### 验收结论
+
+Phase B W3 完成：仓库公开、README/CITATION/Makefile 就位、Release v1.0.0
+含 3 资产且哈希校验通过 ✅
+
+### 遗留问题 / 安全提醒
+
+- **⚠️ 安全**: 本次使用的 GitHub PAT 已在会话中明文出现，**应立即在
+  GitHub 设置中撤销**（Settings → Developer settings → Personal access tokens）。
+- **B5/B6（内容营销）**: 博客与社区发布需人工账号操作，未执行。
+- **B7 数据资产**: `demos_v1.npz` 随 Release 发布即完成 ✅。
+
+- **下一步**: W4 内容营销（博客①②草稿）或收尾
+
+---
