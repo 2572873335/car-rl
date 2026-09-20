@@ -655,3 +655,150 @@ Phase B W3 完成：仓库公开、README/CITATION/Makefile 就位、Release v1.
 - **下一步**: W4 内容营销（博客①②草稿）或收尾
 
 ---
+
+## Phase C W5 — 自博弈探针（RQ3 硬门）
+
+> 性质：**机制探针**（roadmap §Phase C W5 的 3 天硬门）。本轮**未产出研究结论**，
+> 产出的是"这条路能否走通"的判定与判据设计。所有实验在 `/tmp` 下以一次性脚本
+> 执行，**仓库冻结文件零改动**（5 文件 sha256 全部 OK）。
+
+### [2026-09-20] RC.1 `[eval]` 机制接通性 pilot gate
+
+- **命令**: `uv run python /tmp/_pilot_gate.py`（PYTHONPATH 指向仓库）
+- **目的**: 验证 SB3 自定义 `VecEnv` + 共享参数能否驱动两车；属评审建议的
+  "最廉价证伪"前置。
+- **原始输出（关键行）**:
+
+  ```
+  n_worlds=4 -> num_envs(rows)=8
+  per-agent obs space = Box(-inf, inf, (6,), float32)
+  policy features_dim = 6  (MUST be 6)
+  shared policy params = 35205
+  features_dim assert PASSED -> obs-flattening pitfall avoided
+  ```
+
+- **验收结论**: 机制**接通** ✅（共享参数确认：同 obs → 同动作）
+- **踩坑记录**（两条真实机械坑，已写入 plan §1.5/§1.6）:
+  1. `observation_space=Box(shape=(2,4))` → `RuntimeError: mat1 and mat2 shapes
+     cannot be multiplied (2x4 and 8x64)`——SB3 会**摊平前导维**；
+     正解是声明**单 agent 形状**，用 `num_envs=2N` 表达多行。
+  2. `SubprocVecEnv` 顶层直接实例化 → `EOFError: unexpected EOF`
+     （forkserver 反复 re-import）；正解是 `if __name__ == "__main__":` 守卫。
+- **产物**: `results/20260920_phaseC_probe/scripts/_pilot_gate.py`
+
+### [2026-09-20] RC.2 `[eval]` 判据体检——发现两处判据级错误
+
+- **命令**: `/tmp/_test_return_signal.py`、`/tmp/_rule_vs_rule.py`、`/tmp/_chase_redflag.py`
+- **原始输出（关键行）**:
+
+  ```
+  policy           mean(r0+r1)  collision%  offtrack%   predicted
+  zero                     0.0        0.0%       0.0%        -0.0
+  random                -825.0       82.5%       0.0%      -825.0
+  rule                     0.0        0.0%       0.0%        -0.0
+
+  CHECK 1: delta0 at reset over 20 episodes: mean=+0.428 m, min=+0.180
+           all positive (car 0 always starts ahead)? True
+
+  RULE vs RULE: episodes with ZERO lead change: 40/40
+                did either car USE the inner lane? 0/40 episodes
+  ```
+
+- **验收结论**: 两处判据级错误被**在动手前**拦下：
+  1. plan 原称"对称零和 ⇒ 平均回报恒 0，不可作指标"——**证伪**：
+     `mean(r0+r1) = −(1000·p_coll + 200·p_off)` 逐行吻合，回报**携带失败率信号**；
+  2. plan 原 P2"对规则对手胜率 ≥50%"——**饱和**：车 0 固定领先 0.43 m，
+     未训练策略即 20/20；且**规则机 40/40 局零次领先易手、零次用内圈**，
+     **根本不是博弈对手**，判据不可修复。
+- **产物**: 同名脚本 + `findings_phaseC_selftest.md`
+
+### [2026-09-20] RC.3 `[train]` 完整联合自博弈（探针主实验 A）
+
+- **命令**: `/tmp/_run_real_probe2.py`，8 worlds = 16 rows，`n_steps=256`
+- **超参**: 沿用冻结 PPO（`MlpPolicy[128,128]`、lr 3e-4、batch 512、γ0.99、
+  GAE 0.95、clip 0.2、ent_coef 0.01、seed 0）；`device='cuda'`（后经复测改为 cpu，见 RC.5）
+- **更新次数**: 1,280,000/(16×256) = **312.5** ✅（满足铁律 4，虽探针豁免）
+- **原始输出（趋势摘录）**:
+
+  ```
+        steps   mean_ret  ~collision%  entropy_loss   value_loss
+        1,728     -740.0        74.0%
+        2,928      -10.0         1.0%     ← 早期改善
+        4,128        0.0         0.0%
+      ...
+    1,247,552     -880.0        88.0%     -3.369        1.97e+04
+    1,254,000    -1000.0       100.0%     -3.370        1.88e+04
+    1,259,824     -880.0        88.0%     -3.371        8.14e+03
+  ```
+
+- **验收结论**: **不收敛** ❌——碰撞率 4k 步降至 0% 后**反弹并钉死 88–100%**；
+  回报钉在 −880~−1000；熵**不降反升**（2.84 → 3.37 nats，即策略越来越随机、
+  未收敛到确定行为）。训练 814 s。
+- **→ P1 失败，P2（三对照全部饱和）失败**
+- **产物**: `results/20260920_phaseC_probe/probe_run2_joint_selfplay_trend_raw.txt`
+
+### [2026-09-20] RC.4 `[train]` 冻结一方（探针主实验 B，roadmap"联赛退化档"）
+
+- **命令**: `/tmp/_step1_frozen.py`——对手 = 20 次更新后的快照，只训另一车
+- **更新次数**: 200（409,600 步，8 行）
+- **原始输出**:
+
+  ```
+    episodes  mean_return  collision%
+          51       -500.1      100.0%
+       30432          0.3        0.0%
+       98512         -0.3        0.0%
+      166592        -60.4       12.0%
+      404872       -120.8       24.0%
+  ```
+
+- **验收结论**: **学习发生了** ✅——碰撞率 **100% → 24%**（多数时段为 0%），
+  回报 −500 → 近 0。训练 832 s。
+- **→ P2 成立**（冻结对局下碰撞率相对下降 ≥50%）
+- **产物**: `results/20260920_phaseC_probe/probe_run3_frozen_opponent_raw.txt`
+
+### [2026-09-20] RC.5 `[eval]` 基准测量——device 与并行扩展
+
+- **命令**: `/tmp/_bench_parallel2.py`、`/tmp/_device_matrix.py`
+- **原始输出**:
+
+  ```
+  [并行扩展，规则策略驱动冻结 OvertakeEnv]
+    n_envs= 1:  1.00x (efficiency 100.0%)
+    n_envs= 8:  2.89x (efficiency  36.1%)
+    n_envs=16:  3.40x (efficiency  21.3%)
+
+  [device × VecEnv 设计，机器空闲]
+    [A] SubprocVecEnv (8 进程):   cpu 2,587  vs cuda 1,845 steps/s -> cpu 快 40%
+    [B] 单进程 self-play VecEnv:  cpu 2,386  vs cuda 1,881 steps/s -> cpu 快 27%
+  ```
+
+- **验收结论**: 并行扩展**远非线性**（8 路仅 36% 效率）；**CPU 在两种设计下均更快**，
+  故 `device='cpu'` 正确。
+- **⚠️ 重要教训（本轮新增纪律）**: device 结论**曾被并发负载污染而反转**——
+  首测（同时有 1.28M 步训练在跑）得"cuda 快 1.9×"，机器空闲后复测得如上表。
+  **基准测试必须在无其他训练进程时运行，并在记录中注明"机器空闲"状态。**
+- **产物**: 同名脚本 + `findings_phaseC_selftest.md` §F6/§F8
+
+### 阶段结论
+
+Phase C W5 探针**已回答**（当天，非 3 天）：**障碍是非平稳性，不是机制**。
+机制接通良好；完整自博弈不收敛，而**冻结一方即学会**。
+→ 探针主路径定为**冻结一方的联赛模式**；完整自博弈收敛问题降级为 W6–W9 研究内容。
+详见 `plan_phaseC_probe_v2.md` §2.4 与 `research/ASSUMPTIONS.md` P1–P3。
+
+**评审流程价值**：本轮为评审流程**第五次在提交前拦截真问题**。
+若 B1（回报恒 0）+ B2（熵判据方向反）带入执行，会在 Day 3 得到
+"回报不动 + 熵没降"的**双假阴性**，**错误判定 RQ3 失败并提前启动 Phase D**。
+
+### 遗留问题
+
+- **`DATA_MANAGEMENT.md` §10 缺失**：全文仅 §1–§9，但被 12+ 文件引用为
+  "评审流程"依据（`AGENT_HANDOFF`/两份 plan/`RUNLOG`/`ASSUMPTIONS`/三份 `reviews`）。
+  流程本身真实存在，但章节未写。**建议补写或统一改引用**。
+- **报告内圈长度口径**：报告 §5.6/§11.5 写"4.54 m vs 5.49 m"，实测
+  `outer=5.4849 / inner=4.5424`，四舍五入应为 **5.48**。
+- **冻结文件哈希表待补**：`selfplay_env.py`/`train_selfplay.py` 尚未创建；
+  创建后须补入 `DATA_MANAGEMENT.md` §8。
+
+---

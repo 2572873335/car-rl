@@ -4,7 +4,7 @@
 > 15 分钟内接手这个项目。读完后，你应当能：跑通环境、理解当前进度、知道下一步做什么、
 > 并遵守项目的执行纪律。
 >
-> **最后更新**：2026-09-20（HEAD `a4b11c3`，已全部推送，工作区干净）
+> **最后更新**：2026-09-20（Phase C W5 探针完成后）
 
 ---
 
@@ -18,8 +18,15 @@
 零失误、1.4s（规则 2.0s）。**独立复刻 11/11 指标一致**。
 
 **现状**：Phase 0–4（复刻）+ Phase A（RQ2 离线 RL 研究）+ Phase B W3（开源发布）
-已完成。仓库公开，Release v1.0.0 已上线。**Phase C（自博弈）/ D（Sim2Real）/ 
-E（投稿）未启动。**
+已完成。仓库公开，Release v1.0.0 已上线。
+**Phase C 探针已完成，D（Sim2Real）/ E（投稿）未启动。**
+
+**Phase C 探针结论（2026-09-20）**：**障碍是非平稳性，不是机制**。
+完整联合自博弈**不收敛**（1.28M 步后碰撞率钉死 88–100%）；
+**冻结一方（联赛退化档）成功**（碰撞率 100% → 24%，回报 −500 → 近 0）。
+→ 主路径定为**冻结一方的联赛模式**；完整自博弈收敛问题降级为 W6–W9 研究内容。
+详见 `plan_phaseC_probe_v2.md`、`research/ASSUMPTIONS.md` P1–P3、
+`results/20260920_phaseC_probe/`。
 
 **位置**：WSL Ubuntu，`/home/zy/car_rl/code0919`（git 仓库）。
 远端 `git@github.com:2572873335/car-rl.git`（public）。
@@ -111,13 +118,23 @@ reviews/               评审记录（plan review + 报告 review）
 - **B6 渠道**：知乎/掘金 + V2EX + Reddit r/reinforcementlearning
 - 这些需要**人工账号**发布；agent 可起草草稿。
 
-### 中期（Phase C，含硬性探针门）
-- **W5 探针（3 天硬门）**：`PettingZoo` 双 agent + 共享参数训练 100k 步。
-  **建议先试最简实现**（独立 PPO + 参数共享，基于已有 SB3 栈），而非
-  一上来用 RLlib/MARLlib（依赖重、8GB 卡上搭环境就吃掉探针期）。
-  通过标准：loss 正常下降 + 非平凡行为。
-  **失败预案**：放弃 RQ3，Phase D 提前。
-- W6–W9：self-play 主实验（零和奖励 + 混合模式，先登记假设再训）。
+### 中期（Phase C）——W5 探针 ✅ **已完成（2026-09-20）**
+
+**结论**：机制接通良好（SB3 自定义 `VecEnv` + 共享参数，`features_dim=6`），
+但**完整联合自博弈不收敛**；**冻结一方即学会**。障碍是**非平稳性**。
+
+**下一步（W6–W9）应从这个起点开始**：
+1. **不要重跑完整联合自博弈探针**——已实测，勿重复；
+2. 主路径：**冻结一方的联赛模式**——对手用快照，只训一方。
+   这条路径**不需要**自定义 VecEnv、镜像观测、同生共死，
+   可复用 `train_ot.py` 脚手架，工程成本远低于原计划；
+3. W6 的**真正研究内容**：非平稳性缓解（对手池 / 快照历史 / 混合任务+对抗）；
+4. **重要警告**：冻结规则机 `baseline_action_ot` **不是博弈对手**
+   （规则 vs 规则 40/40 局零次领先易手、零次用内圈）——
+   不能拿它当陪练或胜率基线，须用**训练快照**。
+
+原始输出：`results/20260920_phaseC_probe/`（3 份 raw + 11 脚本）；
+自查发现：`findings_phaseC_selftest.md`；评审：`reviews/20260920_phaseC_probe_review1.md`。
 
 ### 远期
 - **Phase D**：Sim2Real 真车（**硬件未下单**，需先采购 ~¥700；G3 决策门在 W12）
@@ -139,13 +156,15 @@ reviews/               评审记录（plan review + 报告 review）
 6. **best/final 双测**：checkpoint 必须两个都测；图 `--out` 版本化命名，禁止覆盖。
 7. **每轮一记**：环境或超参一变，RUNLOG 新增一条；旧文件归档**不删除**。
 
-**新增纪律（§10 评审流程）**：任何新方向/实验批次/环境改动/报告修订前，走
+**新增纪律（`DATA_MANAGEMENT.md` §10 评审流程，2026-09-20 正式成文）**：
+任何新方向/实验批次/环境改动/报告修订前，走
 **plan → review → execute**：先写一页纸方案（假设/方法/验收/风险），交独立评审
 逐条挑硬伤，意见存档 `reviews/`，处理完才动手。**假设必须训练前登记数值阈值**
 （`research/ASSUMPTIONS.md`），落在阈值边界则补 seed 确认，不放宽阈值。
 
-**评审流程已拦截 4 次真问题**（论文三轮 19 项 + sb3-contrib 库选型错误 +
-报告 §4.8 的 30-seed 溯源缺失）——这是项目最值钱的流程资产。
+**评审流程已拦截 5 次真问题**（论文三轮 19 项 + sb3-contrib 库选型错误 +
+报告 §4.8 的 30-seed 溯源缺失 + Phase C 探针的判据双假阴性）
+——这是项目最值钱的流程资产。逐条清单见 `DATA_MANAGEMENT.md` §10.5。
 
 ---
 
@@ -162,6 +181,10 @@ reviews/               评审记录（plan review + 报告 review）
 | gh CLI 用不了 | 加速器自签证书 | 用 `curl -k` + PAT 调 API（release 创建/上传资产已验证可行） |
 | 撞车后策略变保守 | "恐惧屏障"，正常现象 | 需 LfD 而非加罚（见论文 6.2） |
 | best_model 反而是差策略 | 回合回报被回合长度偏置 | best/final 双测（论文 5.7，已复现） |
+| SB3 报 `mat1 and mat2 shapes cannot be multiplied (2x4 and 8x64)` | SB3 **摊平 `observation_space` 前导维**（`(2,4)`→8 维），而每行只产出 4 维 | 声明**单 agent 形状** `(4,)`，用 `num_envs=2N` 表达多行；断言 `features_dim` |
+| `SubprocVecEnv` 顶层实例化 → `EOFError: unexpected EOF` | forkserver 反复 re-import 本模块 | 训练脚本必须 `if __name__ == "__main__":` 守卫 |
+| 基准数字与独立测量相反 | **并发训练进程**抢 CPU，污染计时 | **基准测试须在无其他训练时跑**；记录"机器空闲"状态 |
+| 自博弈碰撞率反弹并钉死高位 | 非平稳性（MARL 常态） | 对手池/快照；或先退到"冻结一方"验证机制 |
 
 ---
 
@@ -192,8 +215,9 @@ wsl -e bash -lc "cd /home/zy/car_rl/code0919 && make check"
 wsl -e bash -c "cd /home/zy/car_rl/code0919 && sed -n '95,145p' research/roadmap.md"
 ```
 
-**若继续 Phase C**：先写 plan（`plan_phaseC_probe.md`），走 §10 评审流程，
-通过后再动手——不要直接开始训练。
+**若继续 Phase C（W6–W9）**：W5 探针**已完成**（见 §4）——**不要重跑完整联合自博弈探针**。
+从**冻结一方的联赛模式**起步；W6 的研究内容是**非平稳性缓解**（对手池 / 快照历史 / 混合模式）。
+仍按 §10 流程：先写 plan（`plan_phaseC_W6.md`）→ 独立评审 → 再动手。
 
 **若只是问答/小改**：直接读 `project_report_full.md` 与 `RUNLOG.md` 即可。
 

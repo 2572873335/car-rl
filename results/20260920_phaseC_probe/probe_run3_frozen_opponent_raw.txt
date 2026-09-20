@@ -1,0 +1,31 @@
+/home/zy/car_rl/code0919/.venv/lib/python3.13/site-packages/stable_baselines3/common/on_policy_algorithm.py:150: UserWarning: You are trying to run PPO on the GPU, but it is primarily intended to run on the CPU when not using a CNN policy (you are using ActorCriticPolicy which should be a MlpPolicy). See https://github.com/DLR-RM/stable-baselines3/issues/1245 for more info. You can pass `device='cpu'` or `export CUDA_VISIBLE_DEVICES=` to force using the CPU.Note: The model will train, but the GPU utilization will be poor and the training might take longer than on CPU.
+  warnings.warn(
+==============================================================================
+STEP 1: FREEZE ONE SIDE (league mode) -- the decisive test
+==============================================================================
+  warm-up done (20 shared-param updates) -> opponent frozen
+  trained 409,600 steps in 832.1s (492 steps/s)
+  updates = 200
+
+   episodes  mean_return  collision%
+         51       -500.1      100.0%
+      30432          0.3        0.0%
+      64472         -0.3        0.0%
+      98512         -0.3        0.0%
+     132552         -0.2        0.0%
+     166592        -60.4       12.0%
+     200632          0.0        0.0%
+     234672        -70.1       14.0%
+     268712        -60.4       12.0%
+     302752         -0.3        0.0%
+     336792         -1.1        0.0%
+     370832        -60.9       12.0%
+     404872       -120.8       24.0%
+
+==============================================================================
+VERDICT
+==============================================================================
+  collision rate: first3=100.0%  last3=24.0%
+  => LEARNING HAPPENED with a frozen opponent.
+     Self-play is viable; non-stationarity (not the
+     mechanism) is the remaining W6 problem.  PROBE PASSES.

@@ -1,0 +1,71 @@
+/home/zy/car_rl/code0919/.venv/lib/python3.13/site-packages/stable_baselines3/common/on_policy_algorithm.py:150: UserWarning: You are trying to run PPO on the GPU, but it is primarily intended to run on the CPU when not using a CNN policy (you are using ActorCriticPolicy which should be a MlpPolicy). See https://github.com/DLR-RM/stable-baselines3/issues/1245 for more info. You can pass `device='cpu'` or `export CUDA_VISIBLE_DEVICES=` to force using the CPU.Note: The model will train, but the GPU utilization will be poor and the training might take longer than on CPU.
+  warnings.warn(
+rows=16  updates=312.5  (iron rule 4 needs >=300)
+win rate vs UNTRAINED snapshot (before): (7, 13, 0)
+trained 1,280,000 steps in 814.0s (1,573 steps/s)
+
+==============================================================================
+P1: entropy trend (first 10 vs last 10 samples) + value loss
+==============================================================================
+  samples available: 3994  (SB3 DOES expose entropy)
+  entropy first10=-2.8352  last10=-3.3738  ratio=1.190
+  P1 entropy criterion (last <= 0.8*first): PASS
+  value_loss first10=2.774e+04 last10=1.649e+04  max=1.281e+05
+  P1 divergence criterion (max < 1e4): FAIL
+  episode returns (r0+r1): n=636905 mean=-420.9 min=-1000 max=+0
+
+==============================================================================
+P2 replacement: win rate vs TRAINED snapshot
+==============================================================================
+Traceback (most recent call last):
+  File "/tmp/_run_real_probe.py", line 211, in <module>
+    main()
+    ~~~~^^
+  File "/tmp/_run_real_probe.py", line 182, in main
+    opp1 = snapshot_opponent(model)
+  File "/tmp/_run_real_probe.py", line 108, in snapshot_opponent
+    return copy.deepcopy(model)
+           ~~~~~~~~~~~~~^^^^^^^
+  File "/home/zy/.local/share/uv/python/cpython-3.13.15-linux-x86_64-gnu/lib/python3.13/copy.py", line 163, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "/home/zy/.local/share/uv/python/cpython-3.13.15-linux-x86_64-gnu/lib/python3.13/copy.py", line 260, in _reconstruct
+    state = deepcopy(state, memo)
+  File "/home/zy/.local/share/uv/python/cpython-3.13.15-linux-x86_64-gnu/lib/python3.13/copy.py", line 137, in deepcopy
+    y = copier(x, memo)
+  File "/home/zy/.local/share/uv/python/cpython-3.13.15-linux-x86_64-gnu/lib/python3.13/copy.py", line 222, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+                             ~~~~~~~~^^^^^^^^^^^^^
+  File "/home/zy/.local/share/uv/python/cpython-3.13.15-linux-x86_64-gnu/lib/python3.13/copy.py", line 163, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "/home/zy/.local/share/uv/python/cpython-3.13.15-linux-x86_64-gnu/lib/python3.13/copy.py", line 260, in _reconstruct
+    state = deepcopy(state, memo)
+  File "/home/zy/.local/share/uv/python/cpython-3.13.15-linux-x86_64-gnu/lib/python3.13/copy.py", line 137, in deepcopy
+    y = copier(x, memo)
+  File "/home/zy/.local/share/uv/python/cpython-3.13.15-linux-x86_64-gnu/lib/python3.13/copy.py", line 222, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+                             ~~~~~~~~^^^^^^^^^^^^^
+  File "/home/zy/.local/share/uv/python/cpython-3.13.15-linux-x86_64-gnu/lib/python3.13/copy.py", line 163, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "/home/zy/.local/share/uv/python/cpython-3.13.15-linux-x86_64-gnu/lib/python3.13/copy.py", line 260, in _reconstruct
+    state = deepcopy(state, memo)
+  File "/home/zy/.local/share/uv/python/cpython-3.13.15-linux-x86_64-gnu/lib/python3.13/copy.py", line 137, in deepcopy
+    y = copier(x, memo)
+  File "/home/zy/.local/share/uv/python/cpython-3.13.15-linux-x86_64-gnu/lib/python3.13/copy.py", line 222, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+                             ~~~~~~~~^^^^^^^^^^^^^
+  File "/home/zy/.local/share/uv/python/cpython-3.13.15-linux-x86_64-gnu/lib/python3.13/copy.py", line 163, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "/home/zy/.local/share/uv/python/cpython-3.13.15-linux-x86_64-gnu/lib/python3.13/copy.py", line 260, in _reconstruct
+    state = deepcopy(state, memo)
+  File "/home/zy/.local/share/uv/python/cpython-3.13.15-linux-x86_64-gnu/lib/python3.13/copy.py", line 137, in deepcopy
+    y = copier(x, memo)
+  File "/home/zy/.local/share/uv/python/cpython-3.13.15-linux-x86_64-gnu/lib/python3.13/copy.py", line 222, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+                             ~~~~~~~~^^^^^^^^^^^^^
+  File "/home/zy/.local/share/uv/python/cpython-3.13.15-linux-x86_64-gnu/lib/python3.13/copy.py", line 144, in deepcopy
+    y = copier(memo)
+  File "/home/zy/car_rl/code0919/.venv/lib/python3.13/site-packages/torch/_tensor.py", line 146, in __deepcopy__
+    raise RuntimeError(
+    ...<5 lines>...
+    )
+RuntimeError: Only Tensors created explicitly by the user (graph leaves) support the deepcopy protocol at the moment.  If you were attempting to deepcopy a module, this may be because of a torch.nn.utils.weight_norm usage, see https://github.com/pytorch/pytorch/pull/103001
