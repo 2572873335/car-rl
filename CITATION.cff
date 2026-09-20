@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+title: "car-rl: Learning to Follow and Overtake — Reinforcement Learning for Low-Speed Fleet Robots"
+message: "If you use this code or dataset, please cite it as below."
+type: software
+authors:
+  - family-names: "Zou"
+    given-names: "Yang"
+repository-code: "https://github.com/2572873335/car-rl"
+license: MIT
+version: "1.0.0"
+date-released: "2026-09-20"
+abstract: >-
+  A digital-twin simulation and reinforcement-learning stack for low-speed
+  fleet robots (AGVs) performing leader-following with a fixed gap and
+  adaptive lane-change overtaking. Provides a layered controller
+  (action prior + residual policy + vehicle dynamics constraints),
+  domain randomization, a reproducible evaluation protocol with full
+  termination-reason auditing, and a released demonstration dataset.
+keywords:
+  - reinforcement learning
+  - PPO
+  - behavior cloning
+  - offline RL
+  - robot following
+  - overtaking
+  - domain randomization
+  - digital twin
