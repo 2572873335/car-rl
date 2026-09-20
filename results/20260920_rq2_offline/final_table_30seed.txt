@@ -1,0 +1,8 @@
+=== 30-seed final four-way table (seeds 2000-2029, five-reason audit) ===
+# nominal / DR
+manual-BC (d300)      : nominal 5/30  collision 25  t_ot 2.3s | DR 6/30  collision 24
+manual-BC-MSE (d300)  : nominal 3/30  collision 27  t_ot 2.4s | DR 3/30  collision 27
+d3rlpy-BC (d300)      : 30/30 collision 0 t_ot 2.1s mean_v 0.53 (DR identical)
+IQL (d300)            : 30/30 collision 0 t_ot 2.1s mean_v 0.53 (DR identical)
+TD3+BC lrhlf (d300)   : 30/30 collision 0 t_ot 2.0s mean_v 0.26 (DR identical)
+PPO finetune (final)  : 30/30 collision 0 t_ot 1.4s mean_v 0.70 (DR identical)
