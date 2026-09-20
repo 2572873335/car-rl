@@ -1,0 +1,5 @@
+=== H7 mechanism variants (d=300, time-boxed: 1 point + 2 variants) ===
+# baseline (NLL, lr 1e-3): 2/10, 8 collision
+H7RESULT variant=mse d=300: success=2/10 collision=8
+H7RESULT variant=lr  d=300: success=0/10 collision=10
+# conclusion: neither loss nor lr explains the failure -> multi-factor, H7 falsified

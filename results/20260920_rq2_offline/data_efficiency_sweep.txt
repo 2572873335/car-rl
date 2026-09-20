@@ -1,0 +1,24 @@
+=== RQ2 data-efficiency sweep (nested subsets of demos_v1.npz) ===
+# eval: 10 fixed seeds 2000-2009, nominal params, five-reason audit
+# ALL methods trained offline (never touch env during training)
+SWEEP bc     d= 50: success=10/10 collision=0 t_ot=2.0s
+SWEEP bc     d=100: success=10/10 collision=0 t_ot=2.0s
+SWEEP bc     d=200: success=10/10 collision=0 t_ot=2.0s
+SWEEP bc     d=300: success=10/10 collision=0 t_ot=2.0s
+SWEEP iql    d= 50: success=10/10 collision=0 t_ot=2.0s
+SWEEP iql    d=100: success=10/10 collision=0 t_ot=2.0s
+SWEEP iql    d=200: success=10/10 collision=0 t_ot=2.0s
+SWEEP iql    d=300: success=10/10 collision=0 t_ot=2.0s
+SWEEP td3bc  d= 50: success=2/10 collision=2 t_ot=1.3s
+SWEEP td3bc  d=100: success=10/10 collision=0 t_ot=2.1s
+SWEEP td3bc  d=200: success=10/10 collision=0 t_ot=1.5s
+SWEEP td3bc  d=300: success=2/10 collision=8 t_ot=8.7s
+
+=== manual-BC (paper implementation, nested subsets) ===
+MANUALBC d= 50: success=0/10  collision=10  t_ot=nans  -> ckpt_offline/manualbc_d50.zip
+MANUALBC d=100: success=0/10  collision=10  t_ot=nans  -> ckpt_offline/manualbc_d100.zip
+MANUALBC d=200: success=0/10  collision=10  t_ot=nans  -> ckpt_offline/manualbc_d200.zip
+MANUALBC d=300: success=2/10  collision=8  t_ot=2.2s  -> ckpt_offline/manualbc_d300.zip
+
+=== H7 mechanism variants (d=300) ===
+(see h7_mechanism.txt)
