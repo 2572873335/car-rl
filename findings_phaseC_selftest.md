@@ -144,6 +144,8 @@ CHECK 2: car0(do-nothing) still ahead in 20/20   (两种 obs 映射下均是)
 3. P2 改为：**随机化初始领先方**后，对规则对手胜率 ≥50% **且**
    对随机对手胜率 ≥70%，并在"对手被赋予领先"的子集上单独报告。
 
+> ⚠️ **【2026-09-21 撤回】** 本小节结论**已被证伪**，勿再引用。根因：作者适配器 `selfplay_to_frozen` 把 `gap` 硬编码为 1.0 m，**关掉了规则机的切入分支**（`baseline_action_ot` 仅在 `gap < 0.45` 时切入），故「零次用内圈」是**工具 bug 的伪影**。改正后规则机 **31/40 局用内圈**。详见 `ERRATUM_phaseC_findings.md`；保真度单测见 `results/20260920_phaseC_probe/scripts/adapter_fidelity_test.py`。
+
 ### F5 后续（**比 F5 本身更严重**）：修复方案部分失效，暴露对手问题
 
 按上条修复（随机化领先方 + 显式 obs 适配层）后**复测**，结果：

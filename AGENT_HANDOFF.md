@@ -129,6 +129,8 @@ reviews/               评审记录（plan review + 报告 review）
    这条路径**不需要**自定义 VecEnv、镜像观测、同生共死，
    可复用 `train_ot.py` 脚手架，工程成本远低于原计划；
 3. W6 的**真正研究内容**：非平稳性缓解（对手池 / 快照历史 / 混合任务+对抗）；
+> ⚠️ **【2026-09-21 撤回】** 本小节结论**已被证伪**，勿再引用。根因：作者适配器 `selfplay_to_frozen` 把 `gap` 硬编码为 1.0 m，**关掉了规则机的切入分支**（`baseline_action_ot` 仅在 `gap < 0.45` 时切入），故「零次用内圈」是**工具 bug 的伪影**。改正后规则机 **31/40 局用内圈**。详见 `ERRATUM_phaseC_findings.md`；保真度单测见 `results/20260920_phaseC_probe/scripts/adapter_fidelity_test.py`。
+
 4. **重要警告**：冻结规则机 `baseline_action_ot` **不是博弈对手**
    （规则 vs 规则 40/40 局零次领先易手、零次用内圈）——
    不能拿它当陪练或胜率基线，须用**训练快照**。

@@ -15,6 +15,12 @@ import numpy as np
 sys.path.insert(0, "/tmp")
 sys.path.insert(0, "/home/zy/car_rl/code0919")
 
+# F12 guard: the frozen env defines gap_ref = (s_other - s_self) % L.
+# Derive it from the real track, never hardcode it.
+from _selfplay_design_probe import build_paths as _bp  # noqa: E402
+_outer, _inner = _bp()
+L_REF = _outer.length
+
 from _selfplay_design_probe import World, build_paths
 from overtake_env import baseline_action_ot
 
@@ -47,10 +53,21 @@ from car_following_sim import Car, PurePursuit, A_START  # noqa: E402
 
 
 def selfplay_to_frozen(o):
-    """Explicit obs-layout adapter (F5 fix #2): my layout -> frozen layout."""
+    """Self-view obs -> frozen layout.
+
+    WARNING (F12 erratum): an earlier version of this adapter hardcoded the
+    gap as 1.0 m ("(1.0 - 0.2) / 0.5"), which DISABLED the rule machine's
+    dive branch (baseline_action_ot dives only when gap < 0.45) and produced
+    the false conclusion "the rule machine never uses the inner lane".
+    The gap MUST be derived from the true geometry:
+        gap_ref = (s_other - s_self) % L   ==   (-delta) % L
+    Guarded by scripts/adapter_fidelity_test.py.
+    """
     delta_n, v_self, v_other, e_lat_n, lane, _ = o
-    return np.array([(1.0 - 0.2) / 0.5, delta_n, v_self, e_lat_n, lane, v_other],
-                    np.float32)
+    delta = delta_n * 2.5                      # metres, signed (self - other)
+    gap_ref = (-delta) % L_REF                 # frozen-env definition
+    return np.array([(gap_ref - 0.2) / 0.5, delta_n, v_self, e_lat_n, lane,
+                     v_other], np.float32)
 
 
 def win_rate(world_cls, policy_fn, opp_fn, n_ep=60, seed0=3000):
