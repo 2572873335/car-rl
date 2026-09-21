@@ -15,10 +15,15 @@ and must budget for producing league members from scratch.
 Measured, not assumed (iron rule 1).
 """
 import sys
-import numpy as np
-sys.path.insert(0, "/tmp")
-sys.path.insert(0, "/home/zy/car_rl/code0919")
 
+# F19 BOOTSTRAP: resolve siblings from THIS directory, never /tmp.
+import os as _os, sys as _sys
+_HERE = _os.path.dirname(_os.path.abspath(__file__))
+while '/tmp' in _sys.path:
+    _sys.path.remove('/tmp')
+if _HERE not in _sys.path:
+    _sys.path.insert(0, _HERE)
+import numpy as np
 from stable_baselines3 import PPO
 from _selfplay_design_probe import build_paths
 from _verify_f5_fix import NeutralWorld as World

@@ -4,9 +4,21 @@ adapter)? Only the frozen band (0.15-0.30) and the v2 default (0.40-0.80)
 matter. 20 episodes each is enough to see FULL vs collision.
 """
 import sys
+
+# F18/F19 BOOTSTRAP: resolve helper modules from the REPO, never /tmp.
+# (/tmp copies caused a stale-module contamination and made these scripts
+#  unrunnable from a clean checkout.)
+import os as _os, sys as _sys
+_RESULTS = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
+_REPO = _os.path.dirname(_RESULTS)
+_SCRIPTS = _os.path.join(_RESULTS, '20260920_phaseC_probe', 'scripts')
+for _p in ('/tmp', '/home/zy/car_rl/code0919'):
+    while _p in _sys.path:
+        _sys.path.remove(_p)
+for _p in (_SCRIPTS, _REPO):
+    if _p not in _sys.path:
+        _sys.path.insert(0, _p)
 import numpy as np
-sys.path.insert(0, "/tmp")
-sys.path.insert(0, "/home/zy/car_rl/code0919")
 
 from _criterion_v3 import WorldV3
 from _selfplay_design_probe import build_paths

@@ -10,10 +10,15 @@ this in 1 day?"  If this smoke works, the mechanism is proven and the
 remaining Phase C risk is only 'does it converge', not 'is it wired right'.
 """
 import sys
-import numpy as np
-sys.path.insert(0, "/tmp")
-sys.path.insert(0, "/home/zy/car_rl/code0919")
 
+# F19 BOOTSTRAP: resolve siblings from THIS directory, never /tmp.
+import os as _os, sys as _sys
+_HERE = _os.path.dirname(_os.path.abspath(__file__))
+while '/tmp' in _sys.path:
+    _sys.path.remove('/tmp')
+if _HERE not in _sys.path:
+    _sys.path.insert(0, _HERE)
+import numpy as np
 from gymnasium import spaces
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import VecEnv

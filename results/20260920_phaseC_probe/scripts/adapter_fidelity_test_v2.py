@@ -10,6 +10,14 @@ gap output against the authoritative frozen-env definition. It FAILS if any
 adapter is missing, uncallable, or wrong.
 """
 import inspect
+
+# F19 BOOTSTRAP: resolve siblings from THIS directory, never /tmp.
+import os as _os, sys as _sys
+_HERE = _os.path.dirname(_os.path.abspath(__file__))
+while '/tmp' in _sys.path:
+    _sys.path.remove('/tmp')
+if _HERE not in _sys.path:
+    _sys.path.insert(0, _HERE)
 import re
 import importlib
 import sys
@@ -17,8 +25,6 @@ import numpy as np
 
 REPO = "/home/zy/car_rl/code0919"
 sys.path.insert(0, REPO)
-sys.path.insert(0, "/tmp")
-
 from car_following_sim import A_START          # noqa: E402
 from overtake_env import _paths                # noqa: E402
 

@@ -12,12 +12,17 @@ opponent, then train ONLY car 0 against it. Report whether car 0's collision
 rate falls and its win rate rises -- i.e. whether learning happens at all.
 """
 import sys
+
+# F19 BOOTSTRAP: resolve siblings from THIS directory, never /tmp.
+import os as _os, sys as _sys
+_HERE = _os.path.dirname(_os.path.abspath(__file__))
+while '/tmp' in _sys.path:
+    _sys.path.remove('/tmp')
+if _HERE not in _sys.path:
+    _sys.path.insert(0, _HERE)
 import time
 import tempfile
 import numpy as np
-sys.path.insert(0, "/tmp")
-sys.path.insert(0, "/home/zy/car_rl/code0919")
-
 from gymnasium import spaces
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import VecEnv

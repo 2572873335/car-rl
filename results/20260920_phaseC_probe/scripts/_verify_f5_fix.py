@@ -11,10 +11,15 @@ recommendations too).  Success criterion for the fix:
   - the win rate should become sensitive to policy quality
 """
 import sys
-import numpy as np
-sys.path.insert(0, "/tmp")
-sys.path.insert(0, "/home/zy/car_rl/code0919")
 
+# F19 BOOTSTRAP: resolve siblings from THIS directory, never /tmp.
+import os as _os, sys as _sys
+_HERE = _os.path.dirname(_os.path.abspath(__file__))
+while '/tmp' in _sys.path:
+    _sys.path.remove('/tmp')
+if _HERE not in _sys.path:
+    _sys.path.insert(0, _HERE)
+import numpy as np
 # F12 guard: the frozen env defines gap_ref = (s_other - s_self) % L.
 # Derive it from the real track, never hardcode it.
 from _selfplay_design_probe import build_paths as _bp  # noqa: E402

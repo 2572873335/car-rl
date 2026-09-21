@@ -22,10 +22,15 @@ Test it directly: two cars, scripted actions, measure whether a persistent
 speed asymmetry can be created at all.
 """
 import sys
-import numpy as np
-sys.path.insert(0, "/tmp")
-sys.path.insert(0, "/home/zy/car_rl/code0919")
 
+# F19 BOOTSTRAP: resolve siblings from THIS directory, never /tmp.
+import os as _os, sys as _sys
+_HERE = _os.path.dirname(_os.path.abspath(__file__))
+while '/tmp' in _sys.path:
+    _sys.path.remove('/tmp')
+if _HERE not in _sys.path:
+    _sys.path.insert(0, _HERE)
+import numpy as np
 from _v2v_transfer_test import WorldV2V
 from _selfplay_design_probe import build_paths, World
 

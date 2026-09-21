@@ -8,6 +8,14 @@ Lesson from the first attempt: without the guard ->
   EOFError: unexpected EOF   in multiprocessing/forkserver.py
 """
 import time
+
+# F19 BOOTSTRAP: resolve siblings from THIS directory, never /tmp.
+import os as _os, sys as _sys
+_HERE = _os.path.dirname(_os.path.abspath(__file__))
+while '/tmp' in _sys.path:
+    _sys.path.remove('/tmp')
+if _HERE not in _sys.path:
+    _sys.path.insert(0, _HERE)
 import numpy as np
 from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv
 from overtake_env import OvertakeEnv, baseline_action_ot

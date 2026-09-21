@@ -15,21 +15,14 @@ time allows, a freshly trained in-world PPO.
 """
 import sys
 
-# F18/F19 BOOTSTRAP: resolve helper modules from the REPO, never /tmp.
-# (/tmp copies caused a stale-module contamination and made these scripts
-#  unrunnable from a clean checkout.)
+# F19 BOOTSTRAP: resolve siblings from THIS directory, never /tmp.
 import os as _os, sys as _sys
-_RESULTS = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
-_REPO = _os.path.dirname(_RESULTS)
-_SCRIPTS = _os.path.join(_RESULTS, '20260920_phaseC_probe', 'scripts')
-for _p in ('/tmp', '/home/zy/car_rl/code0919'):
-    while _p in _sys.path:
-        _sys.path.remove(_p)
-for _p in (_SCRIPTS, _REPO):
-    if _p not in _sys.path:
-        _sys.path.insert(0, _p)
+_HERE = _os.path.dirname(_os.path.abspath(__file__))
+while '/tmp' in _sys.path:
+    _sys.path.remove('/tmp')
+if _HERE not in _sys.path:
+    _sys.path.insert(0, _HERE)
 import numpy as np
-
 from car_following_sim import Car, PurePursuit, A_START, DT
 from _selfplay_design_probe import build_paths, wrapL
 from _ckpt_as_opponent import frozen_layout          # now FIXED

@@ -12,6 +12,14 @@ Track constants copied verbatim from overtake_env._paths() so geometry
 matches the frozen environment. Nothing in the frozen files is modified.
 """
 import numpy as np
+
+# F19 BOOTSTRAP: resolve siblings from THIS directory, never /tmp.
+import os as _os, sys as _sys
+_HERE = _os.path.dirname(_os.path.abspath(__file__))
+while '/tmp' in _sys.path:
+    _sys.path.remove('/tmp')
+if _HERE not in _sys.path:
+    _sys.path.insert(0, _HERE)
 from gymnasium import spaces
 from car_following_sim import LoopPath, Car, PurePursuit, DT, A_START
 
