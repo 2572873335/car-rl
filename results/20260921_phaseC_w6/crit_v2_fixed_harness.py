@@ -86,7 +86,7 @@ def main():
     show("ckpt (out-of-dist)", lambda o, L: ckpt.predict(
         frozen_layout(o, L), deterministic=True)[0])
     show("in-world PPO (trained)", lambda o, L: PPO.load(
-        "/tmp/positive_inworld").predict(o, deterministic=True)[0])
+        str(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "positive_inworld"))).predict(o, deterministic=True)[0])
 
     print()
     print("=" * 92)

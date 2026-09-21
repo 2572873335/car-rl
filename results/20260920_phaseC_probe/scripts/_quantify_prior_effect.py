@@ -24,7 +24,7 @@ if _HERE not in _sys.path:
 import numpy as np
 
 W5 = "/home/zy/car_rl/code0919/results/20260920_phaseC_probe/probe_run2_joint_selfplay_trend_raw.txt"
-V2V = "/tmp/v2v_v4.txt"
+V2V = str(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)).replace("20260921_phaseC_w6", "20260920_phaseC_probe"), "probe_run4_v2v_prior_transfer_raw.txt"))
 
 BUCKET = 200_000
 

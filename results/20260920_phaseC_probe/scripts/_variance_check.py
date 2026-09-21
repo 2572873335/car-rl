@@ -19,7 +19,7 @@ if _HERE not in _sys.path:
     _sys.path.insert(0, _HERE)
 import numpy as np
 
-V2V = "/tmp/v2v_v4.txt"
+V2V = str(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)).replace("20260921_phaseC_w6", "20260920_phaseC_probe"), "probe_run4_v2v_prior_transfer_raw.txt"))
 BUCKET = 200_000
 
 

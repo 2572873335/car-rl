@@ -113,13 +113,13 @@ def main():
     print("training in-world positive control (300 updates)...", flush=True)
     model.learn(total_timesteps=8 * 256 * 300, callback=Trend(venv, 100),
                 progress_bar=False)
-    model.save("/tmp/positive_inworld")
+    model.save(str(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "positive_inworld")))
     print("saved -> /tmp/positive_inworld.zip", flush=True)
 
     # final evaluation
     from _criterion_v2 import run
     import tempfile
-    p = PPO.load("/tmp/positive_inworld")
+    p = PPO.load(str(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "positive_inworld")))
     d, t, k, c, rs = run(lambda o, L: p.predict(o, deterministic=True)[0])
     print()
     print("=" * 70)

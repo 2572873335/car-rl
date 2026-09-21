@@ -99,7 +99,7 @@ def run(pol, n_ep=40, seed0=123000):
 def main():
     from stable_baselines3 import PPO
     ckpt = PPO.load("/home/zy/car_rl/code0919/ckpt_ot/overtake_final_v1.zip")
-    pos = PPO.load("/tmp/positive_inworld")
+    pos = PPO.load(str(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "positive_inworld")))
 
     def loiter(o, L):
         return np.array([-0.25 if o[5] < 0.3 else 0.0, 1.0])
