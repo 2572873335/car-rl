@@ -802,3 +802,53 @@ Phase C W5 探针**已回答**（当天，非 3 天）：**障碍是非平稳性
   创建后须补入 `DATA_MANAGEMENT.md` §8。
 
 ---
+## Phase B W4 — 内容营销（KPI 基线）
+
+### [2026-09-22] RB.1 `[eval]` 博客发布与 KPI 基线回填
+
+- **动作**: 博客①《「跟车」问题的 RL 解法：从零到 1.0 cm》发布至知乎
+  （`https://zhuanlan.zhihu.com/p/2085539647359284278`，由项目负责人发布）
+- **原始输出（可测部分，本机实测非估算）**:
+
+  ```
+  # 网关路线（github 域名被加速器污染，走 ssh/API 网关 172.23.192.1）
+  $ curl -sk --resolve api.github.com:443:172.23.192.1 \
+      https://api.github.com/repos/2572873335/car-rl
+    stargazers_count : 1
+    forks_count      : 0
+    watchers_count   : 1
+    subscribers_count: 0
+    open_issues_count: 0
+    created_at       : 2026-09-19T11:40:15Z
+    pushed_at        : 2026-09-21T16:46:07Z
+
+  $ curl -sk .../releases/latest
+    tag : v1.0.0   published : 2026-09-20T03:44:14Z
+    assets: demos_v1.npz(1383277) follow_stage2_final_v1.zip(452390)
+            overtake_final_v1.zip(460319)
+  ```
+
+- **KPI 基线（**12 月考核起算点**）**:
+
+  | 指标 | 值 | 采集方式 | 时间 |
+  |---|---|---|---|
+  | GitHub star | **1** | GitHub API（网关路线） | 2026-09-22 |
+  | GitHub fork | **0** | 同上 | 2026-09-22 |
+  | watchers / subscribers | 1 / 0 | 同上 | 2026-09-22 |
+  | Release v1.0.0 资产 | 3 个（哈希已在 §9 存证） | 同上 | 2026-09-22 |
+  | **知乎阅读数** | **【待负责人回填】** | 知乎后台（agent 无账号，不可测） | — |
+  | 知乎赞同/收藏/评论 | **【待负责人回填】** | 同上 | — |
+
+- **验收结论**: 博客①已发布 ✅；可测 KPI 已回填 ✅；
+  **知乎侧三项数值须由负责人补入上表**（agent 无该账号权限，不代填、不估算）
+- **与 G2 决策门的关系**（`research/roadmap.md` W4）:
+  > "star < 10 不焦虑（内容传播有滞后），但需在 RUNLOG 记录基线数据"
+  **→ 本条目即为该基线**。发布仅 2 天，**1 star 属预期，不作好坏判断**。
+- **产物**: 本条目；博客草稿 `blog/blog_01_following_rl_1cm.md`（已发布版本）
+- **遗留 / 下一步**:
+  - 博客②（工程纪律）**尚未发布**，与①同源同规格，可直接复用本条目格式；
+  - 发布渠道 B6 计划中的 V2EX / Reddit r/reinforcementlearning **尚未投递**
+    （英文摘要已在草稿内备好）；
+  - **D0 场景保真度审计**已立项（见下一条），硬件采购顺延至 D0 通过。
+
+---
