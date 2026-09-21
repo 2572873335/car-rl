@@ -26,6 +26,11 @@ from _verify_f5_fix import NeutralWorld as World
 CKPT = "/home/zy/car_rl/code0919/ckpt_ot/overtake_final_v1.zip"
 
 
+# F12 GUARD: the frozen env defines gap_ref = (s_other - s_self) % L.
+# An earlier version here used (L/2 - delta) % L -- off by L/2 --
+# which silently disabled the rule machine's dive branch and produced
+# a FALSE positive control. Never hardcode or shortcut the gap.
+# Guarded by adapter_fidelity_test.py.
 def frozen_layout(o_self, L):
     """Map the two-car self-view obs into the FROZEN env's layout so the
     checkpoint's policy reads the quantities it was trained on.
@@ -43,7 +48,7 @@ def frozen_layout(o_self, L):
     delta_n, v_self, v_other, e_lat_n, lane, clear_n = o_self
     delta = delta_n * 2.5                      # metres
     # gap_ref: along-track distance to the other car, wrapped positive
-    gap_ref = (L / 2.0 - delta) % L
+    gap_ref = (-delta) % L          # FIXED (F12): frozen env's definition
     return np.array([
         np.clip((gap_ref - 0.2) / 0.5, -1.0, 6.0),
         delta / 2.5,
