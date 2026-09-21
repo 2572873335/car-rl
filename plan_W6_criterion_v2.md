@@ -152,8 +152,9 @@ FULL = 1  ⟺  曾领先(delta>0.3)
 
 ```bash
 cd /home/zy/car_rl/code0919
-# 重要：确保 /tmp 副本与仓库同步（F18）
-cp results/20260920_phaseC_probe/scripts/_ckpt_as_opponent.py /tmp/
+# 注意：本 plan 已撤回（见文件头）。历史命令曾要求 `cp ... /tmp/`，
+# 该做法违反 file-location 纪律（AGENT_HANDOFF 5b），已删除。
+# 现行脚本从仓库自解析（F18/F19 bootstrap），无需 /tmp。
 PYTHONPATH=$PWD:/tmp uv run python results/20260921_phaseC_w6/crit_v3_full.py
 PYTHONPATH=$PWD:/tmp uv run python results/20260920_phaseC_probe/scripts/adapter_fidelity_test_v2.py
 ```
