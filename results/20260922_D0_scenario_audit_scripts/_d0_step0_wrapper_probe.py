@@ -59,18 +59,21 @@ def run(policy, d_des, v_set, behavior, n_ep=20, seed0=2000):
     w.make()
     errs, coll = [], 0
     reasons = {}
-    for k in range(n_ep):
-        obs, _ = w.reset(seed0 + k)
-        while True:
-            obs, r, term, trunc, _ = w.step(policy(obs))
-            if term or trunc:
-                break
-        g = np.array(w.env.log["gap"])
-        errs.append(np.abs(g - d_des).mean())
-        reasons[w.env.term_reason] = reasons.get(w.env.term_reason, 0) + 1
-        if w.env.term_reason == "collision":
-            coll += 1
-    w.close()
+    try:
+        for k in range(n_ep):
+            obs, _ = w.reset(seed0 + k)
+            while True:
+                obs, r, term, trunc, _ = w.step(policy(obs))
+                if term or trunc:
+                    break
+            g = np.array(w.env.log["gap"])
+            errs.append(np.abs(g - d_des).mean())
+            reasons[w.env.term_reason] = reasons.get(w.env.term_reason, 0) + 1
+            if w.env.term_reason == "collision":
+                coll += 1
+    finally:
+        w.close()
+        assert fe.D_DES == 0.20, f"D_DES leaked: {fe.D_DES}"
     return float(np.mean(errs)), coll / n_ep, reasons
 
 

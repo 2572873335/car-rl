@@ -63,19 +63,24 @@ def run(policy, d_des, v_set, behavior, n_ep=30, seed0=2000):
     w.make()
     whole, settled, coll = [], [], 0
     reasons = {}
-    for k in range(n_ep):
-        obs, _ = w.reset(seed0 + k)
-        while True:
-            obs, r, term, trunc, _ = w.step(policy(w.env, obs))
-            if term or trunc:
-                break
-        e = np.abs(np.array(w.env.log["gap"]) - d_des)
-        whole.append(e.mean())
-        settled.append(e[int(len(e) * 0.2):].mean())
-        reasons[w.env.term_reason] = reasons.get(w.env.term_reason, 0) + 1
-        if w.env.term_reason == "collision":
-            coll += 1
-    w.close()
+    try:
+        for k in range(n_ep):
+            obs, _ = w.reset(seed0 + k)
+            while True:
+                obs, r, term, trunc, _ = w.step(policy(w.env, obs))
+                if term or trunc:
+                    break
+            e = np.abs(np.array(w.env.log["gap"]) - d_des)
+            whole.append(e.mean())
+            settled.append(e[int(len(e) * 0.2):].mean())
+            reasons[w.env.term_reason] = reasons.get(w.env.term_reason, 0) + 1
+            if w.env.term_reason == "collision":
+                coll += 1
+    finally:
+        # restore even on exception, then verify -- a stale D_DES would
+        # silently poison every later grid (review2 B3)
+        w.close()
+        assert fe.D_DES == 0.20, f"D_DES leaked: {fe.D_DES}"
     return (float(np.mean(whole)) * 100, float(np.mean(settled)) * 100,
             coll / n_ep, reasons)
 
@@ -98,13 +103,20 @@ def main():
     print(f"  {'grid':>26s} {'RLwhole':>8s} {'RLsett':>8s} {'PFFwhole':>9s} "
           f"{'PFFsett':>8s} {'winner(sett)':>13s} {'coll':>8s}")
 
+    # Full 9-cell (d,v) grid (plan v3 section 2.5) with behavior=constant,
+    # plus the (0.50,1.00) sinusoid/brake variants. (0.20,1.00) is included
+    # because review1's R4 table cites it (review2 I2).
     grids = [
         (0.20, 0.30, "constant"),   # as-trained
-        (0.20, 0.50, "constant"),
+        (0.20, 0.55, "constant"),
+        (0.20, 1.00, "constant"),   # cited by review1 R4 (review2 I2)
+        (0.50, 0.30, "constant"),
         (0.50, 0.55, "constant"),
         (0.50, 1.00, "constant"),   # AGV-relevant, the claimed reversal
         (0.50, 1.00, "sinusoid"),
         (0.50, 1.00, "brake"),
+        (1.00, 0.30, "constant"),
+        (1.00, 0.55, "constant"),
         (1.00, 1.00, "constant"),
     ]
     for d, v, b in grids:

@@ -942,3 +942,84 @@ $ uv run python results/20260922_D0_scenario_audit_scripts/_d0_reconcile_convent
   - 0.55 分布内边界的**来源须由 review2 裁定**（v2 遗留确认点 3）。
 
 ---
+
+## [2026-09-22] D0 review2 修订落地 + B1 边界独立复现（无训练，无冻结文件改动）
+
+- **命令**: `uv run python results/20260922_D0_scenario_audit_scripts/_d0_review2_boundary_100seed.py`
+  等；逐项见下
+- **目的**: 处理 review2（`reviews/20260922_D0_review2.md`，裁决 **Approve with amendments**）
+  的 4 项拦截级 B1–B4 + 6 项重要问题 I1–I6
+- **机器状态披露（F8）**: 跑前 `pgrep -af 'uv run python'` 仅本批脚本自身；
+  全部确定性计数，同 seed 可复现
+
+### 1. B1（★ 最重要）独立复现：D0.2 贴线是**结构性**，非抽样噪声
+
+复现 `_d0_review2_boundary_100seed.py`，与评审**逐位吻合**：
+
+```
+d=0.50 v=1.00 constant, settled obs-cm：
+  seeds 2000-2099: agg_mean=7.973 std=0.160 max=8.386  ep>8.00: 39/100  coll=0/100
+  seeds 3000-3099: agg_mean=7.946 std=0.185 max=8.337  ep>8.00: 36/100  coll=0/100
+  seeds 4000-4099: agg_mean=7.954 std=0.177 max=8.544  ep>8.00: 37/100  coll=0/100
+  seeds 5000-5099: agg_mean=7.979 std=0.188 max=8.463  ep>8.00: 44/100  coll=0/100
+  P+FF 100 seeds:  agg_mean=5.731 std=0.120 coll=0/100
+```
+
+- **30 seed 的 7.98 与 100 seed 的 7.97 一致** ⇒ 结构性贴线，**补 seed 不能判定**；
+- 按「100 seed 聚合均值」判 **D0.2 通过（7.95–7.98）**；按「单回合」判 **未通过（36–44% 越线）**
+  ⇒ **plan 原文未定义聚合单位 = 不可判**（review1 R3 同型复发）。
+- **修正**：plan v3 §2.2 新增**聚合单位定义**（= 100 seed 的 per-seed settled mean 的均值，
+  判据作用于该值 + 报 ±SE；单回合越线不作判负依据）。**阈值 8 不放宽**，余量 ~0.03 cm 明标。
+
+### 2. B2 「更正只做了一半」——本次自查确认并修复
+
+`ade4041` 撤回「评审混用口径」时**只改了 blockquote**，漏改紧邻的事实 3 括号，
+致同节「review1 自洽」与「review1 混用口径」并存。**grep 实证**：`微弱` 在 review1 出现 **0 次**。
+⇒ 已删该误归因，改记「作者侧 plan v2 §1.2 的 whole 口径标注」。
+**教训（已入记忆）**：撤回一个说法须 grep **全部变体**，改完做矛盾自检。
+
+### 3. B3 wrapper `D_DES` 异常路径泄漏——**已复现并加固**
+
+```
+(a) 正常交叠 RL→close→P+FF：干净（fe.D_DES 归 0.20）
+(b) 异常抛出且 close() 未执行 → fe.D_DES 滞留 0.50
+    raw env 追错设定点：terminal gap=0.463（应为 0.20）   ← 泄漏确凿
+(c) baseline_action 不读 D_DES（附带的伪风险，已证伪）
+```
+
+⇒ plan v3 §1.1.1 新增**强制 try/finally + 每 run 后断言 `fe.D_DES == 0.20`**；
+**并已加固本次自己的落盘脚本**（`_d0_reconcile_conventions.py`、`_d0_step0_wrapper_probe.py`）。
+（评审的探针脚本保留原样——它们是该发现的证据本身。）
+
+### 4. B4 §8.2 陈旧 caveat——已删
+
+「D0.5–D0.7 为交接者起草」系入库存档前的旧文字；`_d0_wrapper_mandate.py` §8.3
+**逐字含有** D0.5–D0.7 ⇒ 即 **owner 原文**。已改为「出处已核对（review2 E）」。
+
+### 5. I1–I6 一并落地
+
+- **I1**：0.55 锚定改用**实证**（训练 sinusoid 瞬时领车速度达 **0.70 m/s**，0.55 在已见带内）；
+- **I2**：reconcile 脚本网格扩至 **11 行**，补回 review1 R4 引用的 `(0.20, 1.00)`；
+- **I3**：§2.4「正值证据」与 D0.2 判定**解耦**（前者是事实陈述，后者独立裁定）；
+- **I4**：`MAX_GAP=2.0` 不随 `d_des` 变 ⇒ lost 窗口漂移，已在 §3 显式说明；
+- **I5**：§2.5 定义「9 格」= **(d,v) 二维网格**、behavior 取 `constant`，变体单列不计入；
+- **I6**：§8.1 增 **Step 0.5**（`SubprocVecEnv` 子进程侧注入 `v_set` 的冒烟验证）。
+
+### 6. 诚实条款（review2 四·3）
+
+训练已见 **0.70 m/s** 瞬时领车速度 ⇒ **v=1.0 只高 43%，非突变**。
+报告/README **不得**表述为「1.0 m/s 是截然不同的分布外速度」，已写入 plan §2.3 与 ASSUMPTIONS。
+
+- **验收结论**: review2 的 4 项拦截级 + 6 项重要问题**全部处理** ✅；
+  plan v3 判据**已可判**（聚合单位已定义）✅；脚本已加固 ✅
+- **产物**: `reviews/20260922_D0_review2.md`（评审）、
+  `results/20260922_D0_scenario_audit_scripts/{_d0_review2_leak_probe.py,_d0_review2_boundary_100seed.py,_d0_review2_degenerate_probe.py}`（评审落盘）、
+  `_d0_review2_boundary_repro.txt`（本次复现）
+- **遗留 / 下一步**:
+  - **§8.1 是否触发铁律 2 的裁定**（review2：**不触发铁律 2，正确触发铁律 4**；
+    新 ckpt 须如实标 v2）——已采纳；
+  - **可开跑 9 格扫描**（review2 已 Approve；B1–B4 已修完）；
+  - **`blind(+1)` 在 d=0.5 v=1.0 20/20 撞车**可作 §10.4 退化反例（评审附带发现）；
+  - `_d0_review3` 与 `plan_D0_scenario_audit.md`(v1) 两处落点缺口已裁定并案处理。
+
+---
