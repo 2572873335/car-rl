@@ -28,15 +28,17 @@ in a reproducible digital-twin simulation.
 > leader-speed range used for training (0.25–0.50 m/s), in the repo's
 > reporting convention: mean gap error over the settled window (the opening
 > catch-up transient excluded), in observation units (`200·|e|` m).
-> A scenario-fidelity audit (D0) found that **this accuracy advantage does not
-> extend to AGV-typical speeds**: at 1.0 m/s the learned controller is *less*
-> accurate than the rule baseline with feed-forward across *every* cell tested
-> (e.g. at 0.50 m gap: 7.98 cm vs 5.74 cm; 1.00 m gap: 7.64 cm vs 6.20 cm,
-> same convention as the table above). The residual policy is regime-local; the
-> structural prior (`v_l + k·e`) extrapolates where the learned residual runs
-> out of headroom under actuator slew limits. See the
-> [D0 scenario audit](plan_D0_scenario_audit_v3.md); the fix under test is to
-> widen the training distribution to the target regime (D0.5–D0.7).
+> A scenario-fidelity audit (D0) swept 11 cells × 3 controllers × 100 seeds and
+> found the accuracy advantage **is confined to the trained speed band**:
+> below 0.5 m/s the learned controller wins every cell, the boundary at 0.55 m/s
+> is mixed, and **at 1.0 m/s the rule baseline with feed-forward wins every
+> cell** (e.g. at 0.50 m gap: 7.97 cm vs 5.73 cm; 1.00 m gap: 7.65 cm vs
+> 6.21 cm, same convention as the table above). The residual policy is
+> regime-local; the structural prior (`v_l + k·e`) extrapolates where the
+> learned residual runs out of headroom under actuator slew limits. Full table:
+> [`docs/scenario_audit.md`](docs/scenario_audit.md). The fix under test is to
+> widen the training distribution to the target regime
+> ([plan](plan_D0_scenario_audit_v3.md), D0.5–D0.7).
 
 **Independently reproduced**: an independent re-run of the full pipeline matched
 **11 of 11** quantitative metrics from the paper (see
