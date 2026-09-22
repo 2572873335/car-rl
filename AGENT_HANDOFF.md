@@ -4,7 +4,7 @@
 > 15 分钟内接手这个项目。读完后，你应当能：跑通环境、理解当前进度、知道下一步做什么、
 > 并遵守项目的执行纪律。
 >
-> **最后更新**：2026-09-20（Phase C W5 探针完成后）
+> **最后更新**：2026-09-22（**Phase C 已中止；D0 场景保真度审计已完成**，见 §4b）
 
 ---
 
@@ -218,6 +218,14 @@ reviews/               评审记录（plan review + 报告 review）
                  P+FF 全程 50/50 零碰撞（但精度差 ~1.5×）
 RQ2(30 seed): manual-BC 5/30 | d3rlpy-BC 30/30 | IQL 30/30 | TD3+BC 30/30(稳定版) | PPO 30/30
 数据效率: IQL N=50 即 10/10; manual-BC N=300 仍 2/10
+
+D0(11格×3策略×100seed, settled obs-cm): RL 优势仅限 v<=0.50
+   v<=0.50   RL 全胜且优势大（0.53–2.79 vs P+FF 2.09–4.81）
+   v=0.55    边界带；d=0.20 处翻转（差 0.086 true-cm，可忽略）
+   v=1.0     五格全部反转（RL 7.42–9.13 vs P+FF 3.30–6.21）
+平台速度上界(六次 stage2, 同610 updates): 含高速段即发散
+   v1 U(0.25,0.50) 1.40 稳定 | v2 6.13 | v3 3.98 | probe 4.40 | armA 4.45 | armB 5.17
+   （唯有「stage2 是否含高速」区分稳定/发散；窄带纯高速亦发散）
 ```
 
 **权威出处**：`project_paper/project_report_full.md`；原始数据 `results/`；
@@ -236,9 +244,17 @@ wsl -e bash -lc "cd /home/zy/car_rl/code0919 && make check"
 wsl -e bash -c "cd /home/zy/car_rl/code0919 && sed -n '95,145p' research/roadmap.md"
 ```
 
-**若重启 Phase C（须先解决判据，见 §4）**：W5 探针**已完成**（见 §4）——**不要重跑完整联合自博弈探针**。
-从**冻结一方的联赛模式**起步；W6 的研究内容是**非平稳性缓解**（对手池 / 快照历史 / 混合模式）。
-仍按 §10 流程：先写 plan（`plan_phaseC_W6.md`）→ 独立评审 → 再动手。
+**当前主线 = Phase D（真车），已获采购绿灯**：D0 审计已完成（包络 v ≤ 0.50 +
+平台速度上界），采购依据齐备。**先读 `docs/scenario_scope_statement.md`**
+（范围声明，含一条 ISO 引用待核）与 `research/roadmap.md` 的 Phase D 节。
+**门禁：D1（规则基线上车）/ D2（RL 跟随上车）各 2 周硬门，未过即转渲染版视频、全力 Phase E。**
+
+**Phase C（RQ3）已中止，勿重启**：判据连续四版被退化策略击穿（`ERRATUM2/3/4`），
+RQ3 降级为未决问题。**不要重跑自博弈探针。** 遗留资产仍有效：封堵者基准 `blocker@v1`、
+反制脚本完成率 0.77、真获胜条件 `lane_b==0`。
+
+**论文 v3 整合**建议作为 Phase E 第一任务（素材已就绪，不依赖 Phase D）：
+见 `research/roadmap.md` Phase E 的章节清单。
 
 **若只是问答/小改**：直接读 `project_report_full.md` 与 `RUNLOG.md` 即可。
 

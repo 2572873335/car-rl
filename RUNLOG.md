@@ -1236,7 +1236,7 @@ armB  U(0.25,1.00) g=1.6      std 5.17  发散
 ### 执行树判定：**第三支——机制证伪，落定选项 2**
 
 - 动作重参数化**不能**挽救宽带训练（两方向均失败）；
-- **选项 2（收窄声明）生效**：`docs/scenario_scope_statement_DRAFT.md`，
+- **选项 2（收窄声明）生效**：`docs/scenario_scope_statement.md`，
   「平台速度上界」入档（含 v2/v3/probe/armA/armB 五次发散证据）。
 
 ### 机制边界（重要，防过度结论）
@@ -1254,7 +1254,7 @@ armB  U(0.25,1.00) g=1.6      std 5.17  发散
   `results/20260922_D0_regime_ext/{train_v4_armA.log,train_v4_armB.log,gain_gate.log}`、
   `gain_sched_env.py`、`train_gain_sched.py`
 - **遗留 / 下一步**:
-  - 选项 2 草案已就绪（`docs/scenario_scope_statement_DRAFT.md`），**待 owner 定稿**；
+  - ~~选项 2 草案待定稿~~ **已定稿**（`docs/scenario_scope_statement.md`，owner 裁决含 ISO 引用待核框）；
   - **Phase D 采购论证**依选项 2 限定：**Sim2Real 对照区间限于 v ≤ 0.50**，
     不得引用高速区结论；
   - 若日后要做平台级 env v2（放开 `V_MAX`/`ACT_GAIN`），须**先有因果证据**，
