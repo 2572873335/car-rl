@@ -25,14 +25,18 @@ in a reproducible digital-twin simulation.
 | | mean time-to-overtake | **1.4 s** | 2.0 s |
 
 > **Operating range.** The following-task numbers above are measured over the
-> leader-speed range used for training (0.25–0.50 m/s). A scenario-fidelity
-> audit (D0) found that **this accuracy advantage does not extend to
-> AGV-typical speeds**: at 1.0 m/s the learned controller is *less* accurate
-> than the rule baseline with feed-forward (5.63 cm vs 5.09 cm). The residual
-> policy is regime-local; the structural prior (`v_l + k·e`) extrapolates
-> where the learned residual runs out of headroom under actuator slew limits.
-> See [D0 scenario audit](plan_D0_scenario_audit_v2.md); the fix under test is
-> to widen the training distribution to the target regime.
+> leader-speed range used for training (0.25–0.50 m/s), in the repo's
+> reporting convention: mean gap error over the settled window (the opening
+> catch-up transient excluded), in observation units (`200·|e|` m).
+> A scenario-fidelity audit (D0) found that **this accuracy advantage does not
+> extend to AGV-typical speeds**: at 1.0 m/s the learned controller is *less*
+> accurate than the rule baseline with feed-forward across *every* cell tested
+> (e.g. at 0.50 m gap: 7.98 cm vs 5.74 cm; 1.00 m gap: 7.64 cm vs 6.20 cm,
+> same convention as the table above). The residual policy is regime-local; the
+> structural prior (`v_l + k·e`) extrapolates where the learned residual runs
+> out of headroom under actuator slew limits. See the
+> [D0 scenario audit](plan_D0_scenario_audit_v3.md); the fix under test is to
+> widen the training distribution to the target regime (D0.5–D0.7).
 
 **Independently reproduced**: an independent re-run of the full pipeline matched
 **11 of 11** quantitative metrics from the paper (see

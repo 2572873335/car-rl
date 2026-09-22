@@ -1,0 +1,16 @@
+/home/zy/car_rl/code0919/.venv/lib/python3.13/site-packages/stable_baselines3/common/on_policy_algorithm.py:150: UserWarning: You are trying to run PPO on the GPU, but it is primarily intended to run on the CPU when not using a CNN policy (you are using ActorCriticPolicy which should be a MlpPolicy). See https://github.com/DLR-RM/stable-baselines3/issues/1245 for more info. You can pass `device='cpu'` or `export CUDA_VISIBLE_DEVICES=` to force using the CPU.Note: The model will train, but the GPU utilization will be poor and the training might take longer than on CPU.
+  warnings.warn(
+==================================================================================
+R4 VERIFICATION: RL vs P+FF across grids
+  obs-cm = 200*|e| [m] (repo convention)   true-cm = 100*|e| [m]
+==================================================================================
+                      grid   RL true   RL obs   PFF true  PFF obs  RL wins?   coll
+        d=0.2 v=0.3 consta     2.48     4.95      4.59     9.17        RL 0%/0%
+        d=0.2 v=0.5 consta     3.61     7.22      5.18    10.36        RL 0%/0%
+       d=0.5 v=0.55 consta     2.52     5.04      4.20     8.40        RL 0%/0%
+        d=0.5 v=1.0 consta     5.63    11.26      5.09    10.18      P+FF 0%/0%
+        d=0.5 v=1.0 sinuso     4.93     9.86      5.02    10.03        RL 0%/0%
+        d=1.0 v=1.0 consta     4.74     9.48      5.21    10.42        RL 0%/0%
+
+READING: if RL loses at d=0.50 v=1.00, R4 is confirmed -- the
+headline reverses on the AGV-relevant grid.

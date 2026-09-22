@@ -852,3 +852,91 @@ Phase C W5 探针**已回答**（当天，非 3 天）：**障碍是非平稳性
   - **D0 场景保真度审计**已立项（见下一条），硬件采购顺延至 D0 通过。
 
 ---
+
+
+## [2026-09-22] D0 文档链修复 + 口径实测（无训练，无冻结文件改动）
+
+- **命令**: 见下「产物」逐项
+- **目的**: 修复 `c0b7b7d` 提交信息声称但**从未落地**的 plan 修改；
+  并对 D0 数字口径做首次实测标定
+- **机器状态披露（F8）**: 跑前 `pgrep -af 'uv run python'` 仅本批脚本自身；
+  全部为**确定性计数**（`mean|e|`、碰撞数），同 seed 可复现
+
+### 1. 发现：提交信息与落地事实不符
+
+`c0b7b7d`（09:41）声称「plan v2 加入 wrapper 硬约束」+「新增 §8」，
+但 `git show --stat` 显示该提交**只改了 `README.md` 与 `_d0_step0_wrapper_probe.py`**。
+
+```
+$ git show c0b7b7d:plan_D0_scenario_audit_v2.md | grep -c wrapper
+0
+$ git log --all -S 'D0.5'      # 空
+```
+
+**根因**：编辑脚本 `_d0_wrapper_mandate.py` 只存在于 `/tmp`（09:39），
+目标文件在仓库；两副本未同步 ⇒ 编辑静默丢失，而提交信息按**意图**书写。
+**这正是已登记的两个坑的叠加**（「写完的文档提交后被旧副本覆盖」+
+「改一处另一份没改」）。
+
+### 2. 实测：D0 数字的聚合口径未声明，同一格差 41%
+
+```
+$ uv run python results/20260922_D0_scenario_audit_scripts/_d0_reconcile_conventions.py
+  (30 seed, true-cm = 100*|e|; whole = 全回合, settled = e[20%:])
+
+  grid                    RLwhole  RLsett  PFFwhole  PFFsett  winner(sett)
+  d=0.2 v=0.3 consta        2.48    0.31     4.59     1.05           RL
+  d=0.2 v=0.5 consta        3.61    1.14     5.18     1.27           RL
+  d=0.5 v=0.55 consta       2.52    1.40     4.20     2.41           RL
+  d=0.5 v=1.0 consta        5.63    3.99     5.09     2.87         P+FF
+  d=0.5 v=1.0 sinuso        4.93    3.44     5.02     2.87         P+FF
+  d=0.5 v=1.0 brake         4.29    3.52     4.30     2.75         P+FF
+  d=1.0 v=1.0 consta        4.74    3.82     5.21     3.10         P+FF
+
+  follow_env.py sha256[:16] before/after: 941c447b969c2fa1  untouched=True
+```
+
+- **评审 R3 段的 3.99 = settled 口径**；**README 与 plan §1.2 的 5.63 = whole 口径**。
+  两边都对，**但都未声明** ⇒ 同一格两个数字。
+- 仓库权威口径 = `train_ppo.py:90`（`obs[0]`×100 ≡ 200|e|，**且跳前 20%**）
+  = **obs-cm + settled**。D0 既有脚本（`_verify_r4_grid.py`、
+  `_d0_step0_wrapper_probe.py`）用 **true-cm + whole**，与仓库数字**不可并列**。
+- **反转范围比 README 现文写的更广**：settled 口径下 v=1.0 **全部格子** P+FF 胜
+  （含评审 R4 表标「RL 微弱胜」的 sinusoid 与 brake 格）。
+
+### 3. 落点修复（§5b / F19）
+
+`/tmp` 抢救入库（`archive/d0_owner_ruling_text/`，附 README）：
+
+| 文件 | 内容 |
+|---|---|
+| `_d0_wrapper_mandate.py` | **owner 裁决原始文本**（wrapper 硬约束 + §8 + D0.5–D0.7 真阈值） |
+| `_probe_d0_stageA.py` | 阶段 A 探针（已被 wrapper probe 取代） |
+| `_commit_d0v2.txt` | `7a30995` 提交信息草稿 |
+| `_d0_wrapper_probe_tmpcopy.py` | /tmp 双副本的证据 |
+
+**未找到**：`_d0_review3`（评审 R3/R4 引用）仓库与 `/tmp` 均无落点，疑随重启蒸发；
+其作用已由 `_d0_reconcile_conventions.py` 替代（口径声明更明确）。
+
+### 4. 文档更新
+
+- 新增 `plan_D0_scenario_audit_v3.md`：**正式吸收 owner wrapper 裁决**（v2 §1.1/§4/§7
+  的「改 `D_DES`」作废）+ 补 §8 regime-extension（**owner 真阈值**，非交接者起草）
+  + 新增 §2.0 聚合口径声明；
+- `research/ASSUMPTIONS.md` 追加 **D0 预登记块**（D0.1–D0.7 + 口径声明 + 边界警报程序）；
+- `archive/d0_owner_ruling_text/README.md`。
+
+- **验收结论**: 文档链已一致 ✅；口径已标定并声明 ✅；
+  **plan v3 待 review2**（§10 流程：plan → review → execute）⇒ **扫描未开跑**
+- **产物**: `plan_D0_scenario_audit_v3.md`、
+  `results/20260922_D0_scenario_audit_scripts/{_d0_reconcile_conventions.py,_r4_regrid_30seed.txt}`、
+  `archive/d0_owner_ruling_text/`、本条目
+- **遗留 / 下一步**:
+  - **plan v3 送 review2**（`reviews/20260922_D0_review2.md`），通过后才开跑 9 格扫描；
+  - **D0.2 贴线（7.98 vs 8.00）须补 30→100 seed**，不放宽阈值；
+  - ~~**README 口径错配**~~ **已修**：operating-range 段已改为
+    obs-cm + settled 口径（`200·|e|`，跳前 20%），并把反转范围从「单格」改为
+    「every cell tested」（与实测一致）；链接已指向 v3；
+  - 0.55 分布内边界的**来源须由 review2 裁定**（v2 遗留确认点 3）。
+
+---

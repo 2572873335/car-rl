@@ -1,0 +1,50 @@
+D0 plan v2: revised after review1 R1-R5 (5 blocking items, all reproduced)
+
+Review1 rejected the D0 plan with 5 blocking items. I independently verified
+the load-bearing ones before revising:
+
+R1 (confirmed): the "stage A measurement-only, don't touch D_DES" design is
+void. follow_env computes e = gap - D_DES with D_DES always 0.20, so claiming
+to measure 0.50/1.00 gap by only changing the reporting formula produces a
+constant 30/80 cm "error" that says nothing about the policy (RL 30.01 vs
+P+FF 29.89 -- indistinguishable).
+
+R2 (confirmed, and it reverses the cost calculus): the CORRECT measurement
+requires changing D_DES, and once you do, the frozen checkpoint works
+zero-shot (d=0.50 -> 0.40 true-cm, d=1.00 -> 0.45 true-cm, zero collision).
+The V2V speed prior + relative-error observation make the gap axis generalize
+structurally other than by learning. So "retraining" on the gap axis is
+provably unnecessary; the expensive thing the plan designed around does not
+exist.
+
+R4 (confirmed, the most valuable finding): the headline "RL 2x better than
+hand-tuned" REVERSES on the AGV-relevant grid. At d=0.50 v=1.0 m/s, RL
+(5.63 true-cm) loses to P+FF (5.09 true-cm). Mechanism: slew-rate saturation
+of a_max at high speed; PPO only learned low-speed small residuals, while
+P+FF's direct v_l + kp*e large-step correction holds up. The plan did not
+predict this nor list it in the risk table. The audit exists precisely to
+expose this truth, and it must be reported honestly, with the README headline
+qualified to the training distribution (<= 0.5 m/s).
+
+Also corrected per the review: braking distance formula is right (velocity
+channel is slew-limited, no tau); the 1.0x0.20 cell is NOT physically doomed
+(zero-collision at constant speed; RL crashes 6/10 only when the leader
+brakes); and D_DES does NOT enter termination (that uses absolute gap
+0.12/2.0).
+
+v2 plan changes:
+  - stage A/B split replaced by "change D_DES + re-evaluate only, no retrain"
+  - unit convention declared (obs-cm = 200*|e|, the repo convention)
+  - thresholds fixed (v1's 12.5% was miscalculated; v1's 5cm would fail the
+    measured 1.0 m/s value)
+  - in-distribution / out-of-distribution boundary defined a priori, with
+    positive-evidence requirements so the audit cannot become "cannot fail"
+  - the v=1.0 reversal reported as a finding, not hidden
+
+Author self-check artifact D0_stageA_selfcheck.md is retained; its load-bearing
+claim (runtime D_DES override works) is consistent with R2's fix, but its
+proposal to shrink the matrix to spacing-only is superseded by the review's
+decision to keep all 9 cells.
+
+Frozen files NOT yet modified. The D_DES change (iron rule 2) is the first
+execution step and awaits review2 approval.
