@@ -24,6 +24,16 @@ in a reproducible digital-twin simulation.
 | **Overtaking** | success rate | **10/10**, zero failures | 10/10 (hand state-machine) |
 | | mean time-to-overtake | **1.4 s** | 2.0 s |
 
+> **Operating range.** The following-task numbers above are measured over the
+> leader-speed range used for training (0.25–0.50 m/s). A scenario-fidelity
+> audit (D0) found that **this accuracy advantage does not extend to
+> AGV-typical speeds**: at 1.0 m/s the learned controller is *less* accurate
+> than the rule baseline with feed-forward (5.63 cm vs 5.09 cm). The residual
+> policy is regime-local; the structural prior (`v_l + k·e`) extrapolates
+> where the learned residual runs out of headroom under actuator slew limits.
+> See [D0 scenario audit](plan_D0_scenario_audit_v2.md); the fix under test is
+> to widen the training distribution to the target regime.
+
 **Independently reproduced**: an independent re-run of the full pipeline matched
 **11 of 11** quantitative metrics from the paper (see
 [`project_paper/project_report_full.md`](project_paper/project_report_full.md), §9–12).
@@ -63,7 +73,15 @@ against hand-tuned rules under an identical observation/action interface.
   to its *implementation*, not its data (see §4.8).
 - **Honest robustness** — a 50-seed sweep shows RL is more accurate at every
   degradation level but has a *failure boundary* just inside the training
-  distribution; the rule baseline never fails but is ~1.5× less accurate.
+  distribution; the rule baseline never fails but is ~1.5× less accurate. The
+  same lesson appears on the speed axis (see the operating-range note above):
+  **the structural prior carries extrapolation, the learned residual is
+  regime-local** — a refinement of the layered-architecture argument.
+- **Decentralised by construction** — following decisions are made on-vehicle
+  from V2V-broadcast leader speed, with no central scheduler. In a fleet this
+  matters: centralised fleet management (FMS/WCS) concentrates both
+  communication and computation, so decentralised following is a necessary
+  complement as fleet size grows, not merely a stylistic choice.
 
 ## Reproduce
 
