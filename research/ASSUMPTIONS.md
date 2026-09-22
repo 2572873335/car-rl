@@ -238,9 +238,10 @@ M1 的问题因此升级为「**RL 能否独立发现这个窗口，或发现更
 聚合：settled = mean|e| over e[20%:]  ← 仓库惯例，跳过开局追赶瞬态
 ```
 
-> **为何必须声明（2026-09-22 实测）**：同一格 d=0.50 v=1.00，全回合口径 RL=5.63 true-cm，
-> 去瞬态口径 RL=3.99 true-cm，**差 41%**。README 现文与评审报告均未声明用哪种，
-> 且评审报告内部 R3 段（settled）与 R4 表（whole）**混用了两个口径**。
+> **为何必须声明（2026-09-22 实测）**：同一格 d=0.50 v=1.00，全回合（whole）口径
+> RL=5.63 true-cm，去瞬态（settled）口径 RL=3.99 true-cm，**差 41%**。
+> **混用口径的是作者侧**（`c0b7b7d` 提交信息、README、plan v2 §1.2 用 whole 且未声明）；
+> `review1` 的数字**逐格对应 settled**（R3 段 3.99 ≡ R4 表 7.98 obs-cm），自洽。
 > 对照脚本：`results/20260922_D0_scenario_audit_scripts/_d0_reconcile_conventions.py`。
 
 | # | 假设 / 判据 | 阈值（obs-cm + settled，定死） | 登记时状态 |

@@ -896,8 +896,10 @@ $ uv run python results/20260922_D0_scenario_audit_scripts/_d0_reconcile_convent
   follow_env.py sha256[:16] before/after: 941c447b969c2fa1  untouched=True
 ```
 
-- **评审 R3 段的 3.99 = settled 口径**；**README 与 plan §1.2 的 5.63 = whole 口径**。
-  两边都对，**但都未声明** ⇒ 同一格两个数字。
+- **混用口径的是作者侧**：README / plan v2 §1.2 / `c0b7b7d` 提交信息用 **whole** 口径
+  （5.63/5.09）且未声明；`review1` 用 **settled** 口径（3.99 ≡ 7.98 obs-cm）**自洽**
+  （grep 证实 review1 全文 0 次出现 5.63/5.09）。
+  ⇒ 同一格两个数字，根源是作者侧未声明，**不是评审报告内部矛盾**（初稿此说有误，已撤回）。
 - 仓库权威口径 = `train_ppo.py:90`（`obs[0]`×100 ≡ 200|e|，**且跳前 20%**）
   = **obs-cm + settled**。D0 既有脚本（`_verify_r4_grid.py`、
   `_d0_step0_wrapper_probe.py`）用 **true-cm + whole**，与仓库数字**不可并列**。
