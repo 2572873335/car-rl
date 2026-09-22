@@ -1132,3 +1132,69 @@ D0.7 (9 格 >=7):                FAIL  — 5/9
   - v1 审计模型 `ckpt/follow_stage2_final_v1.zip` 全程未动（sha256 `4231a613…` 已核）。
 
 ---
+
+## [2026-09-22] regime-extension 发散诊断（v3 课程修复不足 + 高速带探针）
+
+- **命令**:
+  ```
+  uv run python train_regime_ext_v3.py --stage stage1 --band narrow --timesteps 2500000 --n-envs 32 --seed 0 --out ckpt/follow_stage1_v3_speedext.zip
+  uv run python train_regime_ext_v3.py --stage stage2 --band wide   --timesteps 5000000 --n-envs 32 --seed 0 --load ckpt/follow_stage1_v3_speedext.zip --out ckpt/follow_stage2_v3_speedext.zip
+  uv run python probe_highonly.py          # 高速带 U(0.80,1.00)，1M 步
+  uv run python /tmp/_diag_wideband.py
+  uv run python /tmp/_probe_v3_authority.py
+  ```
+- **更新次数（铁律 4）**: v3 stage1 305、v3 stage2 610 ✅；高速探针 123（**短探针，不产出结论**）
+- **冻结文件**: `follow_env.py` sha256 全程未变（wrapper 注入）
+
+### 1. v3（真正的速度轴课程）**仍发散** ⇒ 课程不是根因
+
+| 跑次 | stage2 band | std 轨迹 | 结论 |
+|---|---|---|---|
+| v1 | U(0.25,0.50) | 0.761 → **1.40** | 稳定 |
+| v2 | U(0.25,1.00) | 0.814 → **6.13** | 发散 |
+| **v3** | U(0.25,1.00)（**窄 stage1**） | 0.761 → **3.98** | **仍发散** |
+
+- v3 stage1 窄带收敛良好（reward −89.2、std 0.686，对照 v1 的 −88 / 0.654）⇒ **课程修复本身有效**；
+- 但 stage2 放宽后仍发散 ⇒ **stage1 课程不是根因**（v2 的诊断为「课程空」只解释了一半）。
+
+### 2. 诊断：不是「奖励尺度」，**高速段控制权限收缩**是结构特征
+
+```
+奖励 gap 项跨速度的均值差：v=0.30 −1.12 / v=0.55 −1.34 / v=1.00 −2.00（仅 1.8×，非数量级）
+v_cmd 饱和率（P+FF）：v=0.30 0.0% → v=1.00 6.0%
+控制权限（v_cmd = clip(v_l + 0.8a, 0, 1.3)）：
+   v_l=0.30 → 最多提速 3.67×       v_l=1.00 → 最多提速 1.30×
+```
+
+⇒ **高速段纠错权限收缩是冻结先验的结构属性**（`v_cmd = v_l + 0.8a` + `V_MAX=1.3`）。
+
+### 3. 高速带探针（**证据不足，仅提示**）
+
+`probe_highonly.py`：band **U(0.80,1.00)**、**仅 123 updates**：
+```
+std 0.761 → 1.41（对照 v1 610 updates 后 1.40）
+```
+- **提示**：「纯高速窄带」未出现宽带的发散 ⇒ **「高速 regime 本身」不是充分原因**；
+- **⚠ 但探针只跑 123 updates（v1/v2/v3 均为 610）**，**不足以排除**「发散需更长时间显形」。
+  **不得**据此断言高速带安全。**要定论须跑满 610 updates。**
+
+### 4. 已排除 / 未排除
+
+| 假设 | 状态 |
+|---|---|
+| stage1 课程空（v2 的诊断） | **已排除为充分原因**（v3 修了仍发散） |
+| 奖励平方惩罚尺度爆炸 | **证据不支持**（跨速度仅 1.8×，非数量级） |
+| 高速 regime 本身 | **部分排除**（窄高速带 123 updates 未发散，但证据不足） |
+| **频带宽度/异质性本身**（低+高混合） | **嫌疑最大，未验证** |
+
+- **验收结论**: **D0.5–D0.7 的判定仍悬置**（H-D0.5 未被有效检验）。
+  **v2/v3 均发散 ⇒ 尚未产出可判定的 regime-extension 结果。**
+- **产物**: `ckpt/follow_stage1_v3_speedext.zip`、`ckpt/follow_stage2_v3_speedext.zip`、
+  `ckpt/probe_highonly_1m.zip`、`results/20260922_D0_regime_ext/{train_v3_stage1.log,train_v3_stage2.log,probe_highonly.log}`、
+  `probe_highonly.py`
+- **遗留 / 下一步（三选一，成本各 ~30 min/次）**:
+  1. **跑满高速带探针到 610 updates**（判定「高速 regime」是否真的安全，最便宜、最能定性）；
+  2. 查**频带宽度**假设（如两段式 `U(0.25,0.50)`+`U(0.80,1.00)` 混合，看是否仍发散）；
+  3. 调训练动力学（降 `ent_coef`/LR、奖励归一化）——**属超参搜索，须先与负责人定预算**。
+
+---
