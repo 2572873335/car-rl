@@ -4,7 +4,7 @@
 > 15 分钟内接手这个项目。读完后，你应当能：跑通环境、理解当前进度、知道下一步做什么、
 > 并遵守项目的执行纪律。
 >
-> **最后更新**：2026-09-22（**Phase C 已中止；D0 场景保真度审计已完成**，见 §4b）
+> **最后更新**：2026-09-23（**v1.1.0 发布**；Phase C 已中止；D0 场景保真度审计已完成，见 §4 远期节与 §7）
 
 ---
 
@@ -85,7 +85,8 @@ rq2_offline.py         IQL/TD3+BC 训练与评估
 final_eval_30.py       30-seed 终版评估（转录落盘）
 
 # 文档
-README.md              对外入口（AGV 双重叙事）
+README.md              对外入口（AGV 双重叙事，canonical，英文）
+README.zh-CN.md        对外入口中文译本（随 release 更新；canonical 为 README.md）
 project_paper/         project_report_full.md（含 §4.8/§5.4.1 新章）+ 方法论文 + figures_v2/
 RUNLOG.md              每次运行一条记录（只增不改）
 DATA_MANAGEMENT.md     数据/版本规范 + §10 评审流程 + §8 代码哈希
@@ -106,6 +107,7 @@ reviews/               评审记录（plan review + 报告 review）
 | Phase A W2 | **RQ2 离线 RL**（IQL/TD3+BC/manual-BC/d3rlpy-BC/PPO 五方对照） | `rq2_offline.py`、§4.8 |
 | Phase A A6 | 论文 v2 修订 | §4.8 成章、§5.4.1 扩展、摘要限定词 |
 | Phase B W3 | 开源发布 | README/CITATION/Makefile、**Release v1.0.0** |
+| Phase B W4 | 内容营销 + D0 审计 | 博客①；**v1.1.0**（D0 包络/上界/范围声明，双语） |
 
 **核心研究结论（RQ2）**：
 - **能力-效率谱系**：IQL 零交互即满分（离线数据足够支撑最优策略）；
@@ -145,8 +147,10 @@ reviews/               评审记录（plan review + 报告 review）
 自查发现：`findings_phaseC_selftest.md`；评审：`reviews/20260920_phaseC_probe_review1.md`。
 
 ### 远期
-- **Phase D**：Sim2Real 真车（**硬件未下单**，需先采购 ~¥700；G3 决策门在 W12）
-- **Phase E**：整合投稿（arXiv v3 / workshop）
+- **Phase D**：Sim2Real 真车——**已获采购绿灯**（瘦身版 D1/D2 各 2 周硬门）；
+  立项依据与范围见 `docs/scenario_scope_statement.md` §5 与 roadmap Phase D 节
+- **Phase E**：整合投稿（arXiv v3 / workshop）——**论文 v3 建议为 Phase E 第一任务**，
+  素材已就绪且不依赖 Phase D（清单见 roadmap Phase E 节）
 
 ---
 
@@ -173,6 +177,12 @@ reviews/               评审记录（plan review + 报告 review）
 **评审流程已拦截 5 次真问题**（论文三轮 19 项 + sb3-contrib 库选型错误 +
 报告 §4.8 的 30-seed 溯源缺失 + Phase C 探针的判据双假阴性）
 ——这是项目最值钱的流程资产。逐条清单见 `DATA_MANAGEMENT.md` §10.5。
+
+**双语政策（2026-09-23 起）**：**对外文本双语（英文 canonical），对内文档中文。**
+- 对外（README、release notes、博客）：英文为 canonical，中文为全译本；
+  **中文不是摘要**，数字/链接/结论须逐项对应；译本末尾注明 canonical 出处与"可能滞后"。
+- 对内（plan、RUNLOG、ASSUMPTIONS、评审记录、handoff）：中文，不要求译本。
+- **中文译本随 release 更新**（发版时同步，不留滞后的旧译本）。
 
 ---
 
@@ -222,7 +232,7 @@ RQ2(30 seed): manual-BC 5/30 | d3rlpy-BC 30/30 | IQL 30/30 | TD3+BC 30/30(稳定
 D0(11格×3策略×100seed, settled obs-cm): RL 优势仅限 v<=0.50
    v<=0.50   RL 全胜且优势大（0.53–2.79 vs P+FF 2.09–4.81）
    v=0.55    边界带；d=0.20 处翻转（差 0.086 true-cm，可忽略）
-   v=1.0     五格全部反转（RL 7.42–9.13 vs P+FF 3.30–6.21）
+   v=1.0     五格全部反转（RL 6.85–7.97 vs P+FF 3.30–6.21）
 平台速度上界(六次 stage2, 同610 updates): 含高速段即发散
    v1 U(0.25,0.50) 1.40 稳定 | v2 6.13 | v3 3.98 | probe 4.40 | armA 4.45 | armB 5.17
    （唯有「stage2 是否含高速」区分稳定/发散；窄带纯高速亦发散）

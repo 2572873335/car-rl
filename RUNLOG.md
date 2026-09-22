@@ -1062,7 +1062,7 @@ v=1.00（分布外）: 全部 P+FF 胜
 | D0.4 | 分布内 6 格全不劣 | **5 胜 1 负** | ❌ **未通过** |
 
 **D0.4 未通过（如实报告）**：`(d=0.20, v=0.55)` RL 2.845 > P+FF 2.673，
-差 −0.172 obs-cm（**12.4σ**，统计可分辨但量级可忽略；与 v=1.0 的 1.4–4.1 **不同量级**）。
+差 −0.172 obs-cm（**12.4σ**，统计可分辨但量级可忽略；与 v=1.0 的 1.1–4.1 **不同量级**）。
 按预登记「不许跑完再划范围」，**判未通过**，划界疑虑单独记录不改判。
 
 ### 终止原因全审计（铁律 5）
@@ -1259,5 +1259,59 @@ armB  U(0.25,1.00) g=1.6      std 5.17  发散
     不得引用高速区结论；
   - 若日后要做平台级 env v2（放开 `V_MAX`/`ACT_GAIN`），须**先有因果证据**，
     成本为铁律 2 全套（版本注 + sha256 重铸 + 全部相关训练重来）。
+
+---
+
+## [2026-09-23] v1.1.0 发布（对外文本双语；tag + 内容提交）
+
+- **范围**: v1.0.0 → HEAD 的 35 个 commit 的对外发布（D0 审计 + Phase C 关闭 + 4 份勘误）
+- **双语政策（新）**: 对外文本**英文 canonical + 中文全译**，对内文档中文。
+  已写入 `AGENT_HANDOFF.md` §5。
+- **本次不重复发布**: **RQ2 §4.8 已在 v1.0.0 内**（核对 GitHub 上 v1.0.0 release body 原文确认），
+  故 v1.1.0 **不含** RQ2；亦无新模型资产。
+
+### 交付物
+
+| 文件 | 内容 |
+|---|---|
+| `docs/release_notes_v1.1.0.md` | release 正文，**双语堆叠**（英文全 → `---` → 中文全译） |
+| `README.md` | 加语言链接；新增 *Scope & Known Boundaries* 节；适用范围注记改为"已检验无改善" |
+| `README.zh-CN.md` | **新建**，README 全译（含译名"适用范围与已知边界"+ canonical 页脚） |
+| `CITATION.cff` | version 1.1.0、date 2026-09-23 |
+| `AGENT_HANDOFF.md` | 日期/版本行；文档清单补 `README.zh-CN.md`；§5 双语政策；修 `§4b` 悬挂引用 |
+
+### 发布前的两处数值更正（均在 v1.0.0 之后产生的文档内）
+
+| 错误 | 出现在 | 更正为 |
+|---|---|---|
+| 「1.4–4.1 obs-cm」 | 6 处（scenario_audit×4 / RUNLOG / ASSUMPTIONS） | **1.1–4.1**（原漏算 sinusoid 格的 1.11） |
+| 「RL 7.42–9.13」 | scope_statement + handoff | **6.85–7.97**（原把 v1 下界与 **v2 发散** checkpoint 的上界拼成一个区间） |
+
+**核查方式**：逐项回对 `results/20260922_D0_scenario_audit/summary.csv`（v1 扫描）
+与 `eval_summary.csv`（v1/v2/P+FF 对照）。ASSUMPTIONS 中标注为 v2 的那处本就正确，未动。
+
+### 软化（owner 要求，两种语言同步）
+
+`order of magnitude` / `数量级` → 「数倍至近一个数量级」/ `6x to 24x`，
+改 4 处（`docs/scenario_audit.md`×3、`docs/scenario_scope_statement.md`×1）。
+依据：实测比值 6.4×–24×，下限不足一个数量级。
+
+### 红线自检
+
+- `ISO|3691` 在 release notes / README.md / README.zh-CN.md **0 命中**（严格 token 扫描）；
+- `fully validated` / `works at AGV` / `AGV speeds` / `fixed v1.0.0` / `fixes v1` **全 0**；
+- 措辞：全篇用 "extends the record"「扩展」；勘误节只描述 4 份 ERRATUM 文件本身；
+- v1.0.0 的 release 页面**未做任何修改**。
+
+### 发布执行
+
+- **tag**: `v1.1.0`（指向发布提交）
+- **Release**: 【由 owner 用其 GitHub 凭据创建，或提供 token 后由 agent 执行】
+  —— **本机无任何 GitHub token**（`gh auth status` = 未登录；无 token 文件/env），
+  而 GitHub API 建 release 需鉴权。**agent 无法自行完成该步。**
+- **URL**: 待创建后回填
+
+- **验收结论**: 内容提交 + tag + push 完成；**Release 创建待 owner 执行**（唯一受阻步骤）
+- **产物**: 见上表交付物 + 本条目
 
 ---

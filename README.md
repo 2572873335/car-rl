@@ -1,3 +1,5 @@
+[English](README.md) | [简体中文](README.zh-CN.md)
+
 <div align="center">
 
 # car-rl
@@ -36,9 +38,9 @@ in a reproducible digital-twin simulation.
 > 6.21 cm, same convention as the table above). The residual policy is
 > regime-local; the structural prior (`v_l + k·e`) extrapolates where the
 > learned residual runs out of headroom under actuator slew limits. Full table:
-> [`docs/scenario_audit.md`](docs/scenario_audit.md). The fix under test is to
-> widen the training distribution to the target regime
-> ([plan](plan_D0_scenario_audit_v3.md), D0.5–D0.7).
+> [`docs/scenario_audit.md`](docs/scenario_audit.md). Widening the training
+> distribution into that regime was tested and did **not** help: training
+> destabilises whenever the band includes it (see *Scope & Known Boundaries*).
 
 **Independently reproduced**: an independent re-run of the full pipeline matched
 **11 of 11** quantitative metrics from the paper (see
@@ -88,6 +90,28 @@ against hand-tuned rules under an identical observation/action interface.
   matters: centralised fleet management (FMS/WCS) concentrates both
   communication and computation, so decentralised following is a necessary
   complement as fleet size grows, not merely a stylistic choice.
+
+## Scope & Known Boundaries
+
+What this system is validated to do — and what it is not — is documented rather than
+implied. Three boundaries, each with its source:
+
+1. **Trustworthy envelope: v ≤ 0.50 m/s.** All headline following results are measured
+   inside the trained speed band. Outside it, the learned controller's accuracy
+   advantage does not hold.
+   → [`docs/scenario_audit.md`](docs/scenario_audit.md)
+2. **The advantage reverses at 1.0 m/s.** In every cell tested the rule baseline with
+   feed-forward is more accurate than the learned policy there — by 6x to 24x the
+   margin seen at the 0.55 m/s boundary, where the flip is only 0.086 cm
+   (true-cm) and practically negligible.
+   → [`docs/scenario_audit.md`](docs/scenario_audit.md) §2
+3. **Platform speed bound.** Training destabilises whenever the band includes the
+   high-speed regime — policy action-noise diverges rather than performance degrading
+   gradually, independent of band width, curriculum, or action parameterisation.
+   → [`docs/scenario_scope_statement.md`](docs/scenario_scope_statement.md) §2.3
+
+The authoritative statement of what this project claims, and does not claim, is
+[`docs/scenario_scope_statement.md`](docs/scenario_scope_statement.md).
 
 ## Reproduce
 
