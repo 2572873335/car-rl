@@ -1081,3 +1081,54 @@ P（退化基线）多格 100% collision（0.20/0.30、0.50/0.30），1.0 档 71
   - D0.4 失守格及其「分布内 vs 边界」划界，交 §8 一并讨论（不改判据结论）。
 
 ---
+
+## [2026-09-22] D0 regime-extension 重训 + D0.5–D0.7 判定（**未通过，但被未收敛混淆**）
+
+- **命令**:
+  ```
+  uv run python train_regime_ext.py --stage stage1 --timesteps 2500000 --n-envs 32 --seed 0 --easy --out ckpt/follow_stage1_v2_speedext.zip
+  uv run python train_regime_ext.py --stage stage2 --timesteps 5000000 --n-envs 32 --seed 0 --load ckpt/follow_stage1_v2_speedext.zip --out ckpt/follow_stage2_v2_speedext.zip
+  uv run python results/20260922_D0_regime_ext/eval_d05_d07.py
+  ```
+- **更新次数（铁律 4）**: stage1 305、stage2 610 ✅
+- **注入范围**: `v_set ~ U(0.25, 1.00)`（Step 0.5 实测修正，非 owner 初拟的 1.50）
+- **机器状态披露（F8）**: 各跑前 `pgrep -af 'uv run python'` 为空
+- **冻结文件**: `follow_env.py` sha256 前后一致（wrapper 注入）
+
+### 判定：D0.5 / D0.6 / D0.7 **全部未通过**
+
+```
+D0.5 (v=1.0 格 v2 <= P+FF):     FAIL  — 5 格全负
+      d=0.20 v2=8.373 P+FF=3.300
+      d=0.50 v2=9.126 P+FF=5.731
+      d=0.50 sinusoid v2=7.816 P+FF=5.738
+      d=0.50 brake    v2=8.094 P+FF=5.545
+      d=1.00 v2=8.818 P+FF=6.205
+D0.6 (v<=0.55 不劣 v1):         FAIL  — 最差 1.32x (d=1.00 v=0.30)
+D0.7 (9 格 >=7):                FAIL  — 5/9
+```
+
+### ★ 但结果被「未收敛」混淆 ⇒ H-D0.5 **未测**，非「证伪」
+
+| 证据 | v1 | v2 | 读法 |
+|---|---|---|---|
+| 每格对比 | — | **每格都更差**（含 v=0.30，两分布内均有） | 非分布效应 |
+| 策略 std（stage2 轨迹） | 0.761→1.40 稳定 | **0.814→6.13 单调发散** | 策略退化为近随机 |
+| 确定性 \|a\| 均值 / \|a\|>0.9 占比 | 0.681 / 47.7% | **0.882 / 80.1%** | 动作空间饱和 |
+| v=0.30 settled err (obs-cm) | 0.613 | 0.816 | 分布内格子也退化 |
+
+**根因定位（课程缺陷）**：`regime_ext_env.make_env(easy=True)` 的 `easy`
+**不改速度带**——`RegimeExtWrapper` 恒用 `U(0.25,1.00)`。故 **stage1「easy 课程」
+已跑满宽速度带**，课程在速度轴上是空的（stage1 末 std 0.824 vs v1 的 0.654）。
+
+- **验收结论**: D0.5–D0.7 按预登记**记为未通过**；但**该失败被未收敛混淆**，
+  **不得**据此刻画「速度上界」或否定 H-D0.5。**须先修课程再判。**
+- **诚实条款适用性说明**：plan §8.3 的 honesty clause（「修复失败 ⇒ 报为量化速度上界」）
+  **本轮不适用**——该条款针对**干净的修复失败**，本轮是**训练未收敛**，二者不同。
+- **产物**: `ckpt/follow_stage1_v2_speedext.zip`、`ckpt/follow_stage2_v2_speedext.zip`、
+  `results/20260922_D0_regime_ext/{train_stage1.log,train_stage2.log,eval_d05_d07.py,eval_summary.csv,eval_raw.json,eval_config.txt}`
+- **遗留 / 下一步**:
+  - **v3：速度轴真正的课程**——stage1 用 `U(0.25,0.50)`（同 v1），stage2 放宽到 `U(0.25,1.00)`；
+  - v1 审计模型 `ckpt/follow_stage2_final_v1.zip` 全程未动（sha256 `4231a613…` 已核）。
+
+---
