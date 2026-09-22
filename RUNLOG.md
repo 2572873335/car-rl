@@ -1202,3 +1202,62 @@ std 0.761 → 1.41（对照 v1 610 updates 后 1.40）
      或**收窄声明**（承认孪生仅在 v ≤ 0.50 可信）。**这是决策点，不是 agent 自作主张的范围。**
 
 ---
+
+## [2026-09-22] H-D0.8 动作重参数化：两臂均未收敛 → 落定选项 2（收窄声明）
+
+- **命令**:
+  ```
+  uv run python train_gain_sched.py --arm A     # g_high=0.4（收缩饱和质量）
+  uv run python train_gain_sched.py --arm B     # g_high=1.6（放大残差，owner 原述方向）
+  ```
+- **更新次数（铁律 4）**: 各 610 ✅
+- **前置闸门**: `step05_gain_gate.py` 四项全过（含**两次故障注入自检**：
+  净化的增益调度、构造期抛异常的 worker —— 均被检出）。**闸门已自证会报警。**
+- **冻结文件**: `follow_env.py` sha256 全程未变（wrapper 侧动作重标定）
+
+### 结果：两臂均未收敛，H-D0.8 未通过
+
+| 臂 | g_high | 末 std | 判定 |
+|---|---|---|---|
+| A | 0.4 | **4.45** | ❌（阈值 ≤2.0） |
+| B | 1.6 | **5.17** | ❌ |
+
+**六次 stage2 跑次全表**（同 610 updates）：
+
+```
+v1    U(0.25,0.50)            std 1.40  稳定
+v2    U(0.25,1.00) g=1.0      std 6.13  发散
+v3    U(0.25,1.00) 窄stage1   std 3.98  发散
+probe U(0.80,1.00) 纯高速     std 4.40  发散
+armA  U(0.25,1.00) g=0.4      std 4.45  发散
+armB  U(0.25,1.00) g=1.6      std 5.17  发散
+```
+
+### 执行树判定：**第三支——机制证伪，落定选项 2**
+
+- 动作重参数化**不能**挽救宽带训练（两方向均失败）；
+- **选项 2（收窄声明）生效**：`docs/scenario_scope_statement_DRAFT.md`，
+  「平台速度上界」入档（含 v2/v3/probe/armA/armB 五次发散证据）。
+
+### 机制边界（重要，防过度结论）
+
+`_check_reachable.py` 实测：`v_cmd` **可达集与增益无关**
+（`[max(0,v_l−0.8), min(1.3,v_l+0.8)]`，由冻结文件内的 `V_MAX`/`ACT_GAIN` 锁定）。
+⇒ **本实验从未能检验「权限」假设**。故：
+
+- **被证伪**：「动作重参数化足以解决宽带发散」（更强的说法）；
+- **未证实也未证伪**：「权限不足是根因」（需改冻结文件的 `V_MAX`/`ACT_GAIN`，触发铁律 2）。
+
+- **验收结论**: H-D0.8/H-D0.8b **未通过**；执行树落第三支；
+  选项 1（改冻结文件）**维持否决**（owner 已裁）；**选项 2 生效**。
+- **产物**: `ckpt/follow_stage2_v4_gainA.zip`、`ckpt/follow_stage2_v4_gainB.zip`、
+  `results/20260922_D0_regime_ext/{train_v4_armA.log,train_v4_armB.log,gain_gate.log}`、
+  `gain_sched_env.py`、`train_gain_sched.py`
+- **遗留 / 下一步**:
+  - 选项 2 草案已就绪（`docs/scenario_scope_statement_DRAFT.md`），**待 owner 定稿**；
+  - **Phase D 采购论证**依选项 2 限定：**Sim2Real 对照区间限于 v ≤ 0.50**，
+    不得引用高速区结论；
+  - 若日后要做平台级 env v2（放开 `V_MAX`/`ACT_GAIN`），须**先有因果证据**，
+    成本为铁律 2 全套（版本注 + sha256 重铸 + 全部相关训练重来）。
+
+---
