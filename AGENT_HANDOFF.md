@@ -4,7 +4,7 @@
 > 15 分钟内接手这个项目。读完后，你应当能：跑通环境、理解当前进度、知道下一步做什么、
 > 并遵守项目的执行纪律。
 >
-> **最后更新**：2026-09-23（**v1.1.0 发布**；Phase C 已中止；D0 场景保真度审计已完成，见 §4 远期节与 §7）
+> **最后更新**：2026-09-24（HEAD `8564573`，**v1.1.0 已发布**；Phase C 已中止；D0 审计完成；ISO 引用已核实）
 
 ---
 
@@ -12,30 +12,28 @@
 
 **项目**：把 2022 年 TI 杯电赛 C 题（双小车跟随行驶）重构为强化学习问题。
 在自建二维数字孪生中训练"跟车"（保持 20cm 间距）与"超车"（自主换内圈超越慢车）
-两个策略，与手工规则严格对照。
+两个策略，与手工规则严格对照。对外叙事为**低速车队机器人 / AGV**（论文保留原题背景）。
 
-**成绩**：跟车间距误差 1.00cm（规则最优 1.93cm）、零碰撞；超车 10/10 成功、
+**核心成绩**：跟车间距误差 **1.00cm**（规则最优 1.93cm）、零碰撞；超车 **10/10**、
 零失误、1.4s（规则 2.0s）。**独立复刻 11/11 指标一致**。
 
-**现状**：Phase 0–4（复刻）+ Phase A（RQ2 离线 RL 研究）+ Phase B W3（开源发布）
-已完成。仓库公开，Release v1.0.0 已上线。
-**Phase C 已中止（RQ3 未决），D（Sim2Real）/ E（投稿）未启动。**
+**阶段状态**：
 
-**Phase C 为何中止（2026-09-22）**：探针（W5，09-20）判明障碍是**非平稳性**而非机制；
-但随后的 W6–M1 判据**连续四版被退化策略击穿**，且两次"更正"本身也被评审证伪
-（`ERRATUM4_f23_correction_wrong.md`、`reviews/20260921_phaseC_m1_review1.md`）。
-**在无法构建有效验收判据时 M1 无法开训，遂停。**
+| 阶段 | 状态 |
+|---|---|
+| Phase 0–4（复刻）+ A（RQ2 离线 RL）+ B W3/W4（开源 + 内容） | ✅ 完成 |
+| **Release v1.0.0** | ✅ 已发布（3 个模型/数据资产） |
+| **D0 场景保真度审计** | ✅ **完成**——测绘出平台可信包络与速度上界 |
+| **Release v1.1.0** | ✅ 已发布（D0 结果 + Phase C 关闭 + 4 份勘误，**无新模型资产**） |
+| **C（RQ3 自博弈）** | ⛔ **已中止（2026-09-22），RQ3 降级为未决问题** |
+| **D（Sim2Real）/ E（投稿）** | ⬜ 未启动；**硬件已获采购绿灯，尚未下单** |
 
-**仍成立的资产（勿丢弃）**：封堵者基准 `blocker@v1`（几何退化族在其下全 0.00）、
-反制脚本完成率 0.77（可复现，证明题目可解）、真正的获胜条件
-（封堵者物理位于外圈时切入）、以及 F14/F20/F23 的机制尸检（仓库最有价值的内容）。
+**当前唯一真正的开放动作：硬件下单**（owner 动作，~¥700；清单见 roadmap §4 预算表）。
+D1 的两周硬门**从到货日起算**。
 
-**若要恢复 RQ3**：须先解决"如何测量对抗能力"——命中率类判据已被证伪
-（随机行为命中率更高），可试评审建议的**因果判据**（消融时机能力后完成率
-须显著下降，正例 Δ≈0.47）。详情见 `research/roadmap.md` Phase C 节。
-
-**位置**：WSL Ubuntu，`/home/zy/car_rl/code0919`（git 仓库）。
-远端 `git@github.com:2572873335/car-rl.git`（public）。
+**本项目的性格**：这是一个**"知道自己边界"**的项目。D0 审计的价值不在于证明了
+RL 更好，而在于**精确刻画了它在何处失效**；v1.1.0 的头条就是
+"Scope & platform boundaries"。接手时请保持这个风格——**诚实边界是资产，不是丑事**。
 
 ---
 
@@ -60,6 +58,12 @@ wsl -e bash -lc "cd /home/zy/car_rl/code0919 && make check"   # 健康检查
 wsl -e bash -lc "cd /home/zy/car_rl/code0919 && make demo"    # 全流程 smoke test (~5min)
 ```
 
+**网络（重要）**：`github.com` 域名被 Windows 侧加速器污染（hosts 指向 127.0.0.1）。
+- **git 走 SSH over 443**（`~/.ssh/config` 已配 `ssh.github.com:443`）——push/tag 正常可用；
+- **GitHub API 走网关**：`curl -sk --resolve api.github.com:443:172.23.192.1 ...`；
+- **`gh` CLI 不可用**（未登录 + 加速器自签证书）；
+- **本机无任何 GitHub token** ⇒ **建 Release 需 owner 执行**（网页建或提供 token，见 §8）。
+
 ---
 
 ## 2. 项目结构
@@ -80,25 +84,39 @@ manual_bc_sweep.py     manual-BC 数据效率（H6）
 manual_bc_h7.py        manual-BC 失败机制（H7）
 plot_rq2_efficiency.py RQ2 数据效率图
 
+# D0 审计的可复用资产（**勿丢**）
+gain_sched_env.py      动作重参数化 wrapper（H-D0.8，已证伪但方法可复用）
+probe_highonly.py      纯高速带探针
+results/20260922_D0_scenario_audit/        D0 扫描原始输出 + 包络图
+results/20260922_D0_regime_ext/            regime-extension 六次跑的评估
+results/20260922_D0_scenario_audit_scripts/  D0 扫描的验证脚本（含口径对照）
+
 # 离线 RL（.venv-d3rlpy）
 rq2_offline.py         IQL/TD3+BC 训练与评估
 final_eval_30.py       30-seed 终版评估（转录落盘）
 
-# 文档
-README.md              对外入口（AGV 双重叙事，canonical，英文）
-README.zh-CN.md        对外入口中文译本（随 release 更新；canonical 为 README.md）
-project_paper/         project_report_full.md（含 §4.8/§5.4.1 新章）+ 方法论文 + figures_v2/
-RUNLOG.md              每次运行一条记录（只增不改）
-DATA_MANAGEMENT.md     数据/版本规范 + §10 评审流程 + §8 代码哈希
+# 对外入口（双语，英文 canonical）
+README.md              英文 canonical
+README.zh-CN.md        中文译本（随 release 更新；末页注明 canonical 出处）
+
+# 权威文档
+docs/scenario_scope_statement.md   ★ 范围声明：可信包络 + 平台速度上界（**先读这个**）
+docs/scenario_audit.md             D0 审计结果全表（11 格 × 3 策略 × 100 seed）
+docs/release_notes_v1.1.0.md       v1.1.0 发布正文（双语堆叠）
+project_paper/         project_report_full.md（含 §4.8/§5.4.1）+ 方法论文 + figures_v2/
+RUNLOG.md              每次运行一条记录（**只增不改**）
+DATA_MANAGEMENT.md     数据/版本规范 + §8 哈希 + §10 评审流程（含 10.5b/c、10.9、10.10）
 research/roadmap.md    总路线图（Phase A–E）
-research/ASSUMPTIONS.md 假设登记表（H1–H7，含事后修订披露）
+research/ASSUMPTIONS.md 假设登记（H1–H7 + D0.1–D0.8 + 划界）
+ERRATUM*.md            4 份勘误（**项目最值钱的信任资产**，见 §3.2）
+reviews/               10 份评审记录
+archive/               废弃但被引用者（附 README，**禁止用 /tmp 当唯一居所**）
 results/YYYYMMDD_*/    原始输出、config、曲线（可溯源）
-reviews/               评审记录（plan review + 报告 review）
 ```
 
 ---
 
-## 3. 已完成的工作（按阶段）
+## 3. 已完成的工作
 
 | 阶段 | 内容 | 关键产物 |
 |---|---|---|
@@ -107,9 +125,11 @@ reviews/               评审记录（plan review + 报告 review）
 | Phase A W2 | **RQ2 离线 RL**（IQL/TD3+BC/manual-BC/d3rlpy-BC/PPO 五方对照） | `rq2_offline.py`、§4.8 |
 | Phase A A6 | 论文 v2 修订 | §4.8 成章、§5.4.1 扩展、摘要限定词 |
 | Phase B W3 | 开源发布 | README/CITATION/Makefile、**Release v1.0.0** |
-| Phase B W4 | 内容营销 + D0 审计 | 博客①；**v1.1.0**（D0 包络/上界/范围声明，双语） |
+| Phase B W4 | 内容营销 | 博客①已发布（知乎）；KPI 基线入 RUNLOG |
+| **D0** | **场景保真度审计** | 包络 + 上界 + 范围声明；**Release v1.1.0** |
 
-**核心研究结论（RQ2）**：
+### 3.1 核心研究结论（RQ2）
+
 - **能力-效率谱系**：IQL 零交互即满分（离线数据足够支撑最优策略）；
   PPO 微调把 t_ot 从 2.0s 压到 1.4s（在线交互买效率）；
 - **H6 成立**：manual-BC 瓶颈是**实现**而非数据（同 41936 条数据，d3rlpy-BC
@@ -117,40 +137,75 @@ reviews/               评审记录（plan review + 报告 review）
 - **H7 证伪**：manual-BC 失败机制非损失函数、非学习率（多因素，future work）；
 - **H1 证伪**：IQL 不是"介于 BC 与 PPO 之间"，而是追平在线微调。
 
+### 3.2 ★ D0 审计——本项目最近一次、也最重要的产出
+
+**它回答了什么问题**：学习控制器**在哪里可信、哪里不可信、为什么**。
+
+**三条核心结论**（全部实测，`docs/scenario_audit.md`）：
+
+1. **优势包络**：RL 精度优势**仅限于训练速度带 v ≤ 0.50 m/s**。
+   v = 0.55 是**边界带**（优势收窄，最紧间距处翻转为规则基线领先）；
+   **v = 1.0 处五格全部反转**给带前馈的规则基线。
+2. **平台速度上界**：把训练分布拓展进高速带**不能解决问题——训练会直接失稳**
+   （策略 std 爆炸，非性能渐变）。**六次 stage-2 跑次**（同 610 updates）证明：
+   **唯有「stage2 是否含高速」区分稳定与发散**，与频带宽度、课程设置、
+   动作参数化方向**均无关**（窄带纯高速亦发散）。
+3. **范围声明**：`docs/scenario_scope_statement.md` 是**权威**——声称什么、不声称什么。
+
+**未决的因果问题（勿过度结论）**：高速发散**是否为"控制权限不足"所致，尚未判定**。
+动作重参数化实验（H-D0.8）**未能检验该假设**（可达集与增益无关，由冻结文件的
+`V_MAX`/`ACT_GAIN` 锁定），只证伪了"动作重参数化足以解决"这一更强主张。
+**要判它须改冻结文件，触发铁律 2——当前不做**（优先级已让位 Phase D/E）。
+
+**Phase C 为何中止**：判据**连续四版被退化策略击穿**，且两次"更正"本身也被评审证伪
+（`ERRATUM2/3/4`）。**无法构建有效判据 ⇒ M1 无法开训 ⇒ 停止。**
+保留资产（勿丢）：封堵者基准 `blocker@v1`（几何退化族在其下全 0.00）、
+反制脚本完成率 0.77（可复现，证明题目可解）、真获胜条件（封堵者物理位于外圈时切入）。
+**若要恢复 RQ3**：先解决"如何测量对抗能力"——命中率类判据已被证伪
+（随机行为命中率反而更高，84.6% > 正例 44.6%）；可试**因果判据**（消融时机能力后
+完成率须显著下降，正例 Δ≈0.47）。**不要重跑自博弈探针**（已实测）。
+
+**勘误是信任资产，不是污点**：4 份 ERRATUM 记录了从"适配器 bug 污染结论"
+到"更正本身也错"的完整轨迹。**引入它们是为了让撤回有公信力。**
+
 ---
 
-## 4. 下一步（按 roadmap 优先级）
+## 4. 下一步（按优先级）
 
-### 近期（Phase B W4，内容营销）
-- **B5 博客**：①《"跟车"问题的 RL 解法：从零到 1.0cm》②《14 轮 debug 的工程纪律》
-- **B6 渠道**：知乎/掘金 + V2EX + Reddit r/reinforcementlearning
-- 这些需要**人工账号**发布；agent 可起草草稿。
+### 4.1 立即（owner 动作，阻塞 Phase D）
 
-### 中期（Phase C）——⛔ **已中止（2026-09-22），RQ3 未决**
+**硬件下单**（~¥700，清单见 `research/roadmap.md` §4）。**这是当前项目唯一的开放阻塞项。**
+D1 的两周硬门**从到货日起算**。
 
-**结论**：机制接通良好（SB3 自定义 `VecEnv` + 共享参数，`features_dim=6`），
-但**完整联合自博弈不收敛**；**冻结一方即学会**。障碍是**非平稳性**。
+### 4.2 可并行（agent 可做，不依赖硬件）
 
-**下一步（W6–W9）应从这个起点开始**：
-1. **不要重跑完整联合自博弈探针**——已实测，勿重复；
-2. 主路径：**冻结一方的联赛模式**——对手用快照，只训一方。
-   这条路径**不需要**自定义 VecEnv、镜像观测、同生共死，
-   可复用 `train_ot.py` 脚手架，工程成本远低于原计划；
-3. W6 的**真正研究内容**：非平稳性缓解（对手池 / 快照历史 / 混合任务+对抗）；
-> ⚠️ **【2026-09-21 撤回】** 本小节结论**已被证伪**，勿再引用。根因：作者适配器 `selfplay_to_frozen` 把 `gap` 硬编码为 1.0 m，**关掉了规则机的切入分支**（`baseline_action_ot` 仅在 `gap < 0.45` 时切入），故「零次用内圈」是**工具 bug 的伪影**。改正后规则机 **31/40 局用内圈**。详见 `ERRATUM_phaseC_findings.md`；保真度单测见 `results/20260920_phaseC_probe/scripts/adapter_fidelity_test.py`。
+**论文 v3 整合**——**建议作为 Phase E 第一任务**，素材已就绪且**不依赖 Phase D**：
 
-4. **重要警告**：冻结规则机 `baseline_action_ot` **不是博弈对手**
-   （规则 vs 规则 40/40 局零次领先易手、零次用内圈）——
-   不能拿它当陪练或胜率基线，须用**训练快照**。
+| 素材 | 出处 | 状态 |
+|---|---|---|
+| 包络表（v≤0.50 / 0.55 边界 / 1.0 反转） | `docs/scenario_audit.md` | ✅ |
+| 平台速度上界 + 六次发散表 | `docs/scenario_scope_statement.md` §2.3 | ✅ |
+| **发散规律**（突变式失稳，与带宽/课程无关） | 同上 | ✅ ← **值讨论段一整节** |
+| 范围声明 | 同上 §3 | ✅ |
+| RQ2 离线 RL | 报告 §4.8 | ✅ |
+| 鲁棒性曲线 | 报告 §5.4.1 | ✅ |
 
-原始输出：`results/20260920_phaseC_probe/`（3 份 raw + 11 脚本）；
-自查发现：`findings_phaseC_selftest.md`；评审：`reviews/20260920_phaseC_probe_review1.md`。
+### 4.3 Phase D（硬件到货后，**2 周硬门**）
 
-### 远期
-- **Phase D**：Sim2Real 真车——**已获采购绿灯**（瘦身版 D1/D2 各 2 周硬门）；
-  立项依据与范围见 `docs/scenario_scope_statement.md` §5 与 roadmap Phase D 节
-- **Phase E**：整合投稿（arXiv v3 / workshop）——**论文 v3 建议为 Phase E 第一任务**，
-  素材已就绪且不依赖 Phase D（清单见 roadmap Phase E 节）
+| 阶段 | 任务 | 验收（硬门） |
+|---|---|---|
+| **D1** | 机械组装 + 底层联调 | **规则基线上车循迹通过** |
+| **D2** | RL 部署（ONNX → 真车），跑跟随任务 | **RL 跟随上车通过** |
+| D3 | 核心实验：包络 **v ≤ 0.50** 内实测退化 vs 鲁棒性曲线预测 | RQ4 闭合 |
+| D4 | 标定回路：实测 τ/a_max 反哺孪生参数 | 缩小"不可信带" |
+| D5 | 视频 + 报告 v3 "Sim2Real" 章 | 2 分钟演示 |
+
+**门禁（owner 裁决）**：**任何门到期未过 → 转渲染版视频，全力 Phase E**，
+不在硬件上追加时间。立项依据见 `docs/scenario_scope_statement.md` §5。
+
+### 4.4 其他已排队项
+
+- **博客②**（工程纪律）草稿就绪未发布；B6 渠道（V2EX / Reddit）未投递；
 
 ---
 
@@ -168,19 +223,23 @@ reviews/               评审记录（plan review + 报告 review）
 6. **best/final 双测**：checkpoint 必须两个都测；图 `--out` 版本化命名，禁止覆盖。
 7. **每轮一记**：环境或超参一变，RUNLOG 新增一条；旧文件归档**不删除**。
 
-**新增纪律（`DATA_MANAGEMENT.md` §10 评审流程，2026-09-20 正式成文）**：
-任何新方向/实验批次/环境改动/报告修订前，走
-**plan → review → execute**：先写一页纸方案（假设/方法/验收/风险），交独立评审
-逐条挑硬伤，意见存档 `reviews/`，处理完才动手。**假设必须训练前登记数值阈值**
-（`research/ASSUMPTIONS.md`），落在阈值边界则补 seed 确认，不放宽阈值。
+**评审流程（`DATA_MANAGEMENT.md` §10，**项目最值钱的流程资产**）**：
+任何新方向/实验批次/环境改动/报告修订前，走 **plan → review → execute**：
+先写一页纸方案（假设/方法/验收/风险），交**独立评审**逐条挑硬伤，
+意见存档 `reviews/`，处理完才动手。**假设必须训练前登记数值阈值**
+（`research/ASSUMPTIONS.md`），落在阈值边界则**补 seed 确认，不放宽阈值**。
 
-**评审流程已拦截 5 次真问题**（论文三轮 19 项 + sb3-contrib 库选型错误 +
-报告 §4.8 的 30-seed 溯源缺失 + Phase C 探针的判据双假阴性）
-——这是项目最值钱的流程资产。逐条清单见 `DATA_MANAGEMENT.md` §10.5。
+**§10 的几条专项纪律**（每条都由一次真实事故换来）：
+
+| 条目 | 一句话 |
+|---|---|
+| §10.4 / 10.5b / 10.5c | 判据须先过**退化反例表**（含几何族与随机扰动类） |
+| §10.9 | **commit 引用的文件必须同 commit 存在**——提交信息描述的是意图，不是事实 |
+| §10.10 | **执行权边界**：只做不需新授权的事；需凭据的精确交还，**被拦下不绕过** |
 
 **双语政策（2026-09-23 起）**：**对外文本双语（英文 canonical），对内文档中文。**
-- 对外（README、release notes、博客）：英文为 canonical，中文为全译本；
-  **中文不是摘要**，数字/链接/结论须逐项对应；译本末尾注明 canonical 出处与"可能滞后"。
+- 对外（README、release notes、博客）：英文 canonical，中文为**全译本**（不是摘要），
+  数字/链接/结论须逐项对应；译本末尾注明 canonical 出处与"可能滞后"。
 - 对内（plan、RUNLOG、ASSUMPTIONS、评审记录、handoff）：中文，不要求译本。
 - **中文译本随 release 更新**（发版时同步，不留滞后的旧译本）。
 
@@ -197,25 +256,30 @@ reviews/               评审记录（plan review + 报告 review）
 **配套**：`.gitignore` 会静默吞掉 `*.zip` / `*.npz`——新增资产须同步加例外
 （见 `DATA_MANAGEMENT.md` §9）。废弃但被引用者入 `archive/<主题>_deprecated/` 并附 README。
 
+---
+
 ## 6. 已知坑（前人血泪）
 
 | 症状 | 根因 | 对策 |
 |---|---|---|
 | `uv: command not found` | 非登录 shell 无 PATH | 用 `bash -lc` |
-| 脚本里 `$!`/反引号被吞 | Windows 侧 Git Bash 先展开 heredoc | **用 Write 工具写文件再拷**，别在 `wsl -e bash -c` 里塞含反引号的 heredoc |
+| 脚本里 `$!`/反引号被吞 | Windows 侧 Git Bash 先展开 heredoc | **用 Write 工具写文件再拷**，别在 `wsl -e bash -c` 里塞含反引号的 heredoc。**`git commit -m` 多行消息同样中招**，一律 `-F <文件>` |
 | 30-seed 数字无出处 | 手写汇总冒充"原始输出" | 用脚本生成转录（`final_eval_30.py`），数字一律脚本产出 |
 | d3rlpy 装上后主环境 gymnasium 被降级 | d3rlpy pin gymnasium==1.0.0 | **只装 `.venv-d3rlpy/`**，装完 `sha256sum -c` 验证冻结文件 |
 | 离线扫描覆盖 ckpt | 同名 `.pt` 被覆写 | 用 `--tag` 区分；关键模型先归档 |
-| `github.com` 连不上 | Windows 加速工具 hosts 污染到 127.0.0.1 | git 走 **SSH over 443**（`~/.ssh/config` 已配 `ssh.github.com:443`） |
-| gh CLI 用不了 | 加速器自签证书 | 用 `curl -k` + PAT 调 API（release 创建/上传资产已验证可行） |
+| `github.com` 连不上 | Windows 加速工具 hosts 污染 | git 走 **SSH over 443**；API 走网关 `172.23.192.1` |
+| gh CLI 用不了 / **建 Release 失败** | 未登录 + 自签证书 + **无 token** | **Release 由 owner 网页建**（见 §8） |
 | 撞车后策略变保守 | "恐惧屏障"，正常现象 | 需 LfD 而非加罚（见论文 6.2） |
 | best_model 反而是差策略 | 回合回报被回合长度偏置 | best/final 双测（论文 5.7，已复现） |
-| SB3 报 `mat1 and mat2 shapes cannot be multiplied (2x4 and 8x64)` | SB3 **摊平 `observation_space` 前导维**（`(2,4)`→8 维），而每行只产出 4 维 | 声明**单 agent 形状** `(4,)`，用 `num_envs=2N` 表达多行；断言 `features_dim` |
-| `SubprocVecEnv` 顶层实例化 → `EOFError: unexpected EOF` | forkserver 反复 re-import 本模块 | 训练脚本必须 `if __name__ == "__main__":` 守卫 |
-| 基准数字与独立测量相反 | **并发训练进程**抢 CPU，污染计时 | **基准测试须在无其他训练时跑**；记录"机器空闲"状态 |
+| SB3 报 `mat1 and mat2 shapes...` | SB3 **摊平 obs 前导维** | 声明**单 agent 形状** `(4,)`，用 `num_envs=2N`；断言 `features_dim` |
+| `SubprocVecEnv` → `EOFError` | forkserver 反复 re-import | 训练脚本须 `if __name__ == "__main__":` 守卫 |
+| 基准数字与独立测量相反 | **并发训练抢 CPU** | 测前 `pgrep` 确认机器空闲 |
 | 自博弈碰撞率反弹并钉死高位 | 非平稳性（MARL 常态） | 对手池/快照；或先退到"冻结一方"验证机制 |
-| **验收闸门"子进程挂了仍打 PASS"** | 校验器自身没被验证 **（owner 2026-09-22）** | **任何验收闸门必须能用注入故障验证自己会报警**（kill 一个 worker 应得 FAIL）；校验器不 self-test 等于没有。例：`step05_gain_gate.py` 注入两个故障并断言被检出 |
-| **采样分布大量质量被截断团成质点** | 未检查截断堆积 **（owner 2026-09-22）** | **任何采样分布先检查截断堆积**。例：`v_set ~ U(0.25,1.50)` 有 40% 区间落在 leader clip 之上，团成 1.0 质点 ⇒ 有效分布退化 |
+| **验收闸门"子进程挂了仍打 PASS"** | 校验器自身没被验证 **（owner 09-22）** | **闸门必须能用注入故障验证自己会报警**；不 self-test 等于没有。例：`results/20260922_D0_regime_ext/step05_gain_gate.py` |
+| **采样分布大量质量被截断团成质点** | 未检查截断堆积 **（owner 09-22）** | **先检查截断堆积**。例：`v_set ~ U(0.25,1.50)` 有 40% 落在 leader clip 之上 ⇒ 有效分布退化 |
+| **短探针误判收敛性** | 123 updates 的探针显示"未发散"，跑满 610 后实为 4.40 **（09-22）** | **以"是否发散"为判据的探针，必须跑到与对照同量级的 updates** |
+| **跨 checkpoint 混数字** | 把 v1（收敛）下界与 v2（**发散**）上界拼成一个"区间" **（09-23）** | 引用数值区间前**逐项回对原始 CSV**；发散 checkpoint 的数字**不可与收敛的并列** |
+| **写了文档说"已改 X"但 X 没改** | 编辑脚本在 `/tmp`、目标在仓库，静默丢失 **（09-22）** | 提交前 `git show --stat` + 对目标文件 grep 关键字（见 §10.9） |
 
 ---
 
@@ -229,17 +293,25 @@ reviews/               评审记录（plan review + 报告 review）
 RQ2(30 seed): manual-BC 5/30 | d3rlpy-BC 30/30 | IQL 30/30 | TD3+BC 30/30(稳定版) | PPO 30/30
 数据效率: IQL N=50 即 10/10; manual-BC N=300 仍 2/10
 
-D0(11格×3策略×100seed, settled obs-cm): RL 优势仅限 v<=0.50
-   v<=0.50   RL 全胜且优势大（0.53–2.79 vs P+FF 2.09–4.81）
-   v=0.55    边界带；d=0.20 处翻转（差 0.086 true-cm，可忽略）
-   v=1.0     五格全部反转（RL 6.85–7.97 vs P+FF 3.30–6.21）
+D0(11格×3策略×100seed, settled obs-cm): RL 优势仅限 v<=0.50（训练带）
+   v=0.30（训练带内）RL 0.53–0.62 | P+FF 2.09–3.52   → RL 全胜且优势大
+   v=0.55（边界带）  优势收窄；d=0.20 处翻转（差 0.086 true-cm，可忽略）
+   v=1.0（分布外）   五格全部反转（RL 6.85–7.97 vs P+FF 3.30–6.21）
 平台速度上界(六次 stage2, 同610 updates): 含高速段即发散
    v1 U(0.25,0.50) 1.40 稳定 | v2 6.13 | v3 3.98 | probe 4.40 | armA 4.45 | armB 5.17
    （唯有「stage2 是否含高速」区分稳定/发散；窄带纯高速亦发散）
+Phase C 资产: blocker@v1 下几何族 0.00 | 反制脚本完成率 0.77 | 真获胜条件 lane_b==0
+ISO 3691-4: 分区速度适应（警告场减速/防护场停止，场尺寸随车速缩放）；
+            唯一固定限速 0.3 m/s（限人员检测静默工况），**落在本平台包络内**
+KPI 基线(2026-09-22): GitHub star 1 / fork 0 | 知乎阅读数【待负责人回填】
 ```
 
+**口径警示（引用前必读）**：仓库所有 `mean|e|` 数字 = **settled 窗口 + obs-cm**
+（`200×|e|`，`train_ppo.py:90` 惯例）。**D0 数字与论文数字可直接比较**；
+但早期 D0 脚本曾误用 whole-episode + true-cm，**引用旧脚本输出前先确认口径**。
+
 **权威出处**：`project_paper/project_report_full.md`；原始数据 `results/`；
-每次运行 `RUNLOG.md`。
+每次运行 `RUNLOG.md`；范围问题一律以 `docs/scenario_scope_statement.md` 为准。
 
 ---
 
@@ -250,23 +322,22 @@ D0(11格×3策略×100seed, settled obs-cm): RL 优势仅限 v<=0.50
 wsl -e bash -lc "cd /home/zy/car_rl/code0919 && git log --oneline -1 && git status -s"
 # 2. 跑健康检查（必须全过）
 wsl -e bash -lc "cd /home/zy/car_rl/code0919 && make check"
-# 3. 读路线图决定方向
-wsl -e bash -c "cd /home/zy/car_rl/code0919 && sed -n '95,145p' research/roadmap.md"
+# 3. 读范围声明与路线图
+wsl -e bash -lc "cd /home/zy/car_rl/code0919 && cat docs/scenario_scope_statement.md"
+wsl -e bash -lc "cd /home/zy/car_rl/code0919 && sed -n '/^### Phase D/,/^### Phase E/p' research/roadmap.md"
 ```
 
-**当前主线 = Phase D（真车），已获采购绿灯**：D0 审计已完成（包络 v ≤ 0.50 +
-平台速度上界），采购依据齐备。**先读 `docs/scenario_scope_statement.md`**
-（范围声明，含一条 ISO 引用待核）与 `research/roadmap.md` 的 Phase D 节。
-**门禁：D1（规则基线上车）/ D2（RL 跟随上车）各 2 周硬门，未过即转渲染版视频、全力 Phase E。**
+**当前主线 = Phase D（真车）**，但**第一步阻塞在 owner 的硬件下单**（§4.1）。
+在硬件到货前，**agent 最有价值的动作是推进论文 v3 整合**（§4.2，素材已就绪、不依赖硬件）。
 
-**Phase C（RQ3）已中止，勿重启**：判据连续四版被退化策略击穿（`ERRATUM2/3/4`），
-RQ3 降级为未决问题。**不要重跑自博弈探针。** 遗留资产仍有效：封堵者基准 `blocker@v1`、
-反制脚本完成率 0.77、真获胜条件 `lane_b==0`。
+**若要建新 Release**：内容与 tag 可自行完成（SSH 可用），
+但 **Release 本体需 owner 执行**——本机无 token，未鉴权 POST 返回 401。
+**不要尝试寻找凭据**（见 §10.10；一次凭据扫描曾被权限分类器拦下，该拦截是对的）。
 
-**论文 v3 整合**建议作为 Phase E 第一任务（素材已就绪，不依赖 Phase D）：
-见 `research/roadmap.md` Phase E 的章节清单。
+**Phase C（RQ3）已中止，勿重启**：不要重跑自博弈探针；遗留资产见 §3.2。
 
-**若只是问答/小改**：直接读 `project_report_full.md` 与 `RUNLOG.md` 即可。
+**若只是问答/小改**：直接读 `project_report_full.md`、`docs/scenario_scope_statement.md`
+与 `RUNLOG.md` 即可。
 
 ---
 
@@ -274,4 +345,5 @@ RQ3 降级为未决问题。**不要重跑自博弈探针。** 遗留资产仍�
 
 - 项目曾使用一个 GitHub PAT（已在会话中明文出现）——**若尚未撤销，应立即
   在 GitHub Settings → Developer settings 中删除**。
-- 推送走 SSH key（`~/.ssh/id_ed25519`），无需 PAT。
+- 推送走 SSH key（`~/.ssh/id_ed25519`），**无需 PAT**。
+- **本机当前无任何 token**，这是**常态而非缺陷**：需要鉴权的动作交还 owner（§10.10）。
