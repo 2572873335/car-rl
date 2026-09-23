@@ -110,6 +110,20 @@ implied. Three boundaries, each with its source:
    gradually, independent of band width, curriculum, or action parameterisation.
    → [`docs/scenario_scope_statement.md`](docs/scenario_scope_statement.md) §2.3
 
+**Why the low-speed band matters.** ISO 3691-4:2023, the international safety
+standard for driverless industrial trucks (AGVs/AMRs), mandates *zone-based speed
+adaptation* around people: a warning field triggers reduced speed, a protective
+field triggers a safe stop, and the field size scales with vehicle speed and
+system response time. The only fixed speed figure in the standard's context is
+**0.3 m/s**, applicable when personnel detection is muted (e.g. docking at a load
+transfer station). That figure falls **inside this platform's validated envelope**
+(0.25–0.50 m/s), so the band covered here is the safety-critical one where
+tight-formation following matters most; site-specific limits remain a matter of
+risk assessment rather than a single number.
+*(Standard title, version and the zone mechanism are primary-source confirmed; the
+0.3 m/s figure is from secondary technical interpretation — high confidence, not
+read from the standard text itself.)*
+
 The authoritative statement of what this project claims, and does not claim, is
 [`docs/scenario_scope_statement.md`](docs/scenario_scope_statement.md).
 
