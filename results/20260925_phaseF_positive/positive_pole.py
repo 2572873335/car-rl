@@ -50,7 +50,26 @@ RECOVER = 0.998
 
 
 class PositivePole:
-    """Hand-coded 'anticipate and yield' follower -- the Phase F threshold anchor."""
+    """Hand-coded follower -- the Phase F threshold anchor.
+
+    MECHANISM, corrected per review1 R2 (an earlier description claimed
+    "anticipate and yield"; the anticipate half is DEAD CODE):
+
+        a = -1                    if the ACHIEVED closing rate c = -d(gap)/dt
+                                   exceeds the gap-dependent envelope c_max
+        a = clip(kp*e/ACT, -1, 1) otherwise
+
+    i.e. plain P control, plus one full-authority brake rule that fires on
+    2.4-8.1% of steps. Ablation (review1): clamping the commanded closing rate
+    ALONE crashes 60/220; the full-authority brake ALONE passes 0/220. What
+    carries the behaviour is braking on the ACHIEVED rate, not anticipation.
+
+    DEAD PARAMETERS: YTHRESH, YG, YMAX, RECOVER never bind -- YTHRESH=0.20
+    against a per-step speed-change ceiling of a_max*DT <= 0.04 (unreachable;
+    measured 0 triggers across 11 families x 3 spacings). The command clamp
+    (c_max/ACT) also never binds (0/1001 nominal steps). Kept for lineage; do
+    not cite them as mechanism.
+    """
 
     def __init__(self):
         self.reset()
