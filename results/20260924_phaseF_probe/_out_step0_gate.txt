@@ -1,0 +1,12 @@
+====================================================================================
+STEP 0 GATE: adversarial leader via subclass (frozen file untouched)
+====================================================================================
+  leader command range emitted: 0.050 .. 0.780
+  distinct values (>1 means it really varies): 169
+  episodes ran, steps: 400
+
+  follow_env.py sha256[:16] before: 941c447b969c2fa1
+  follow_env.py sha256[:16] after : 941c447b969c2fa1
+  frozen file untouched: True
+
+  GATE: PASS

@@ -1,0 +1,21 @@
+============================================================================================
+ROBUSTNESS vs FAILING-SAFE  (crash count AND settled tracking error)
+============================================================================================
+        attack  d_des   controller  coll/20  settled err (obs-cm)  mean gap (m)
+     bang-bang   0.20         P+FF   20/20                47.59         0.422
+     bang-bang   0.20        v1 RL    0/20                 1.87         0.191
+     bang-bang   0.50         P+FF   15/20                35.25         0.436
+     bang-bang   0.50        v1 RL    0/20                 1.90         0.491
+     osc f=0.5   0.20         P+FF    0/20                 2.34         0.202
+     osc f=0.5   0.20        v1 RL   20/20                40.35         0.384
+     osc f=0.5   0.50         P+FF    0/20                 3.83         0.500
+     osc f=0.5   0.50        v1 RL    0/20                 9.03         0.498
+       nominal   0.20         P+FF    0/20                 2.54         0.202
+       nominal   0.20        v1 RL    0/20                 2.28         0.211
+       nominal   0.50         P+FF    0/20                 4.52         0.500
+       nominal   0.50        v1 RL    0/20                 2.48         0.512
+
+  READ: low crash + LOW error  = genuinely robust
+        low crash + HIGH error = failing safe (lagging), not robust
+
+[exited with code 0]

@@ -1,0 +1,28 @@
+==============================================================================
+POSITIVE-POLE CHECK: does ANY leader script reach >=60% vs rule defender?
+==============================================================================
+  d_des=0.2:
+          sawtooth p=1.0  P+FF  0/20   v1 RL  0/20
+          sawtooth p=2.0  P+FF  0/20   v1 RL  0/20
+          sawtooth p=4.0  P+FF  0/20   v1 RL  0/20
+          step-down 0.1s  P+FF 20/20   v1 RL  0/20
+          step-down 0.2s  P+FF 20/20   v1 RL  0/20
+          step-down 0.4s  P+FF 20/20   v1 RL  2/20
+          step-down 0.8s  P+FF  0/20   v1 RL 12/20
+        cruise-then-stop  P+FF  0/20   v1 RL  0/20
+               osc f=0.5  P+FF  0/20   v1 RL 20/20
+  d_des=0.5:
+          sawtooth p=1.0  P+FF  0/20   v1 RL  0/20
+          sawtooth p=2.0  P+FF  0/20   v1 RL  0/20
+          sawtooth p=4.0  P+FF  0/20   v1 RL  0/20
+          step-down 0.1s  P+FF 16/20   v1 RL  0/20
+          step-down 0.2s  P+FF 15/20   v1 RL  0/20
+          step-down 0.4s  P+FF  0/20   v1 RL  0/20
+          step-down 0.8s  P+FF  0/20   v1 RL  0/20
+        cruise-then-stop  P+FF  0/20   v1 RL  0/20
+               osc f=0.5  P+FF  0/20   v1 RL  0/20
+
+  scripts reaching >=60% vs P+FF: ['step-down 0.1s', 'step-down 0.2s', 'step-down 0.4s']
+  (>=60% of 20 = 12 crashes)
+
+[exited with code 0]
