@@ -1,0 +1,15 @@
+=== STEP 0.5 gate 1 (from training log) ===
+  updates recorded     : 245
+  std first/last/max   : 1.000 / 1.403 / 1.433
+  gate 1 (std max < 2.0)          : PASS
+==========================================================================
+STEP 0.5 -- gate 2 (completion) on the trained defender
+==========================================================================
+  episodes                : 40
+  mean episode length [s] : 19.72  (t_max=20.0)
+  early terminations      : 5.0% (2/40)
+  collisions              : 2/40
+  gate 2 (early-term < 50%): PASS
+
+  NB: gate 1 already passed during training (std max 1.433 < 2.0),
+  so STEP 0.5 = PASS
