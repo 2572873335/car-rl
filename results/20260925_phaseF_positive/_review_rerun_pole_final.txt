@@ -1,0 +1,55 @@
+============================================================================================
+POSITIVE POLE -- FINAL VALIDATION
+  locked: margin=0.05 safety=0.6 kp=0.8 yth=0.2 yg=0.25 ymax=0.06
+============================================================================================
+
+  d_des = 0.2
+      step-down 0.1s  coll  0/20   settled err   1.50
+      step-down 0.2s  coll  0/20   settled err   7.24
+      step-down 0.4s  coll  0/20   settled err   7.96
+      step-down 0.8s  coll  0/20   settled err   3.78
+           osc 0.5Hz  coll  0/20   settled err   2.52
+           osc 0.3Hz  coll  0/20   settled err   1.90
+           osc 0.8Hz  coll  0/20   settled err   3.96
+               chirp  coll  0/20   settled err   4.74
+            pw-const  coll  0/20   settled err   8.73
+             nominal  coll  0/20   settled err   2.24
+               crawl  coll  0/20   settled err   1.23
+               TOTAL  coll  0/220
+
+  d_des = 0.5
+      step-down 0.1s  coll  0/20   settled err  21.73
+      step-down 0.2s  coll  0/20   settled err  24.00
+      step-down 0.4s  coll  0/20   settled err  24.11
+      step-down 0.8s  coll  0/20   settled err   4.60
+           osc 0.5Hz  coll  0/20   settled err   3.83
+           osc 0.3Hz  coll  0/20   settled err   4.53
+           osc 0.8Hz  coll  0/20   settled err   4.72
+               chirp  coll  0/20   settled err   5.03
+            pw-const  coll  0/20   settled err   4.93
+             nominal  coll  0/20   settled err   4.52
+               crawl  coll  0/20   settled err   0.96
+               TOTAL  coll  0/220
+
+  d_des = 1.0
+      step-down 0.1s  coll  0/20   settled err  40.41
+      step-down 0.2s  coll  0/20   settled err  78.28
+      step-down 0.4s  coll  0/20   settled err  22.71
+      step-down 0.8s  coll  0/20   settled err   4.16
+           osc 0.5Hz  coll  0/20   settled err   3.90
+           osc 0.3Hz  coll  0/20   settled err   3.83
+           osc 0.8Hz  coll  0/20   settled err   4.13
+               chirp  coll  0/20   settled err   4.14
+            pw-const  coll  0/20   settled err   4.40
+             nominal  coll  0/20   settled err   3.66
+               crawl  coll  0/20   settled err   1.82
+               TOTAL  coll  0/220
+
+============================================================================================
+ACCEPTANCE
+============================================================================================
+  d=0.20  nominal err: pole 2.24 vs P+FF 2.54 -> ratio 0.88x  OK (<=1.5x)
+  d=0.50  nominal err: pole 4.52 vs P+FF 4.52 -> ratio 1.00x  OK (<=1.5x)
+  d=1.00  nominal err: pole 3.66 vs P+FF 3.66 -> ratio 1.00x  OK (<=1.5x)
+
+  ALL ACCEPTANCE: PASS
