@@ -1,0 +1,12 @@
+====================================================================================
+ATTACKER REWARD SCALE CHECK  (defender = frozen P+FF)
+  W_ERR=0.1  W_CRASH=500.0  W_IDLE=0.05
+====================================================================================
+   behaviour   mean return  mean steps    last term
+    idle             -13.5        1001      timeout
+    cosine           -12.8        1001      timeout
+    bangbang         511.3          93    collision
+
+  idle -13.5  vs  bangbang 511.3   ->  diff +524.8
+  crashing is favoured by a wide margin: True
+  VERDICT: PASS
