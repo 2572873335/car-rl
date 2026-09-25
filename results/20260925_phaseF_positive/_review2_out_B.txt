@@ -1,0 +1,38 @@
+====================================================================================================
+B1  REPRODUCE review1's conventions: single-episode (seed 2000) nominal
+====================================================================================================
+          pole  coll 0  nominal err    2.19   (review1 quoted: 2.19)
+   zero action  coll 0  nominal err   83.22   (review1 quoted: 83.22)
+          P+FF  coll 0  nominal err    2.49   (review1 quoted: 2.49)
+
+====================================================================================================
+B2  FREEZE BRANCH OCCUPANCY in the B group  (does 'freeze' actually fire?)
+====================================================================================================
+      freeze gap<0.40 c>0.20  freeze fires 101/1001 = 10.09%   crash   3/100   errB pooled 4.24
+      freeze gap<0.30 c>0.15  freeze fires 139/1001 = 13.89%   crash   3/100   errB pooled 4.27
+         freeze envelope a=0  freeze fires 142/1001 = 14.19%   crash   2/100   errB pooled 3.55
+   smart freeze dv>0.10 h0.3  freeze fires 0/1001 =  0.00%   crash   3/100   errB pooled 4.23
+
+====================================================================================================
+B3  SEED BAND: pole B-group settled error on three attack-seed blocks
+====================================================================================================
+  attack seeds 50000+ :  crash   0/100  per-item B1:6.17 B2:3.35 B3:3.72 B4:3.14 B5:3.55   pooled 3.99
+  attack seeds 77000+ :  crash   0/100  per-item B1:5.34 B2:3.23 B3:3.72 B4:2.93 B5:3.60   pooled 3.76
+  attack seeds 91000+ :  crash   0/100  per-item B1:5.14 B2:2.73 B3:3.72 B4:3.05 B5:3.58   pooled 3.65
+
+====================================================================================================
+B4  DEGENERATE SEPARATION: pole envelope vs freeze-envelope, B group
+====================================================================================================
+         pole (brake a=-1)  crash   0/100  pooled err 3.99   per-item B1:6.17 B2:3.35 B3:3.72 B4:3.14 B5:3.55
+     freeze envelope (a=0)  crash   2/100  pooled err 3.55   per-item B1:6.21 B2:2.68 B3:2.81 B4:2.76 B5:3.28
+              smart freeze  crash   3/100  pooled err 4.23   per-item B1:9.86 B2:2.59 B3:2.81 B4:2.65 B5:3.24
+
+====================================================================================================
+B5  HARD SUBSET (step-down) -- pole 0/220 claim, freeze variants
+====================================================================================================
+                    pole total   0/60  step-down 0.1s:  0/20 (err 1.50)  step-down 0.2s:  0/20 (err 7.24)  step-down 0.4s:  0/20 (err 7.96)
+   freeze envelope (a=0) total  60/60  step-down 0.1s: 20/20 (err 45.33)  step-down 0.2s: 20/20 (err 47.59)  step-down 0.4s: 20/20 (err 46.76)
+    smart freeze dv>0.10 total  60/60  step-down 0.1s: 20/20 (err 45.33)  step-down 0.2s: 20/20 (err 47.59)  step-down 0.4s: 20/20 (err 51.10)
+                    P+FF total  60/60  step-down 0.1s: 20/20 (err 45.33)  step-down 0.2s: 20/20 (err 47.59)  step-down 0.4s: 20/20 (err 51.10)
+
+DONE

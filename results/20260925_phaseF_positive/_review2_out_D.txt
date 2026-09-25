@@ -1,0 +1,37 @@
+/home/zy/car_rl/code0919/.venv/lib/python3.13/site-packages/stable_baselines3/common/on_policy_algorithm.py:150: UserWarning: You are trying to run PPO on the GPU, but it is primarily intended to run on the CPU when not using a CNN policy (you are using ActorCriticPolicy which should be a MlpPolicy). See https://github.com/DLR-RM/stable-baselines3/issues/1245 for more info. You can pass `device='cpu'` or `export CUDA_VISIBLE_DEVICES=` to force using the CPU.Note: The model will train, but the GPU utilization will be poor and the training might take longer than on CPU.
+  warnings.warn(
+========================================================================================================
+D  SHARP FREEZE DEGENERATES: 'catch up nominally, then stop acting'
+========================================================================================================
+                          policy      B1     B2     B3     B4     B5    TOTAL errB_pool  nom_err  frozen%  meanGap
+                   pole (anchor)     0/20    0/20    0/20    0/20    0/20     0/100      3.99     2.24             0.219
+                            P+FF     3/20    0/20    0/20    0/20    0/20     3/100      4.23     2.54             0.210
+       catch-then-freeze |e|<.02     4/20    0/20    0/20    0/20    0/20     4/100      7.39     3.80    75.7%    0.231
+       catch-then-freeze gap<.25     3/20    0/20    0/20    0/20    0/20     3/100     11.82     9.49    80.2%    0.255
+     freeze-envelope (brake->a0)     2/20    0/20    0/20    0/20    0/20     2/100      3.55     2.54    14.2%    0.206
+                     zero action     0/20    0/20    0/20    0/20    0/20     0/100    106.93   113.52             0.735
+
+========================================================================================================
+D2  THE FIVE-CLAUSE CHECK (baseline = frozen v1 RL, 36/100; gate on (e) =
+    1.5 x pole's OWN B-group pooled err = 5.98, i.e. the correctly anchored form)
+========================================================================================================
+  pole B-group pooled err = 3.99  => correctly anchored (e) gate = 5.98
+  (the plan's written gate was 3.28, anchored to the NOMINAL 2.19)
+
+                          policy   (a)  (b)<=10%  (c)>=50%  (e)<=5.98   VERDICT
+                   pole (anchor)    OK     0/100      True      True       3.99      PASS
+       catch-then-freeze |e|<.02    OK     4/100      True      True       7.39      fail
+       catch-then-freeze gap<.25    OK     3/100      True      True      11.82      fail
+     freeze-envelope (brake->a0)    OK     2/100      True      True       3.55      PASS
+                     zero action    OK     0/100      True      True     106.93      fail
+                            P+FF    OK     3/100      True      True       4.23      PASS
+
+================================================================================
+C  FROZEN v1 RL on the B group -- reproduce the published 36 -> 40 band
+================================================================================
+  attack seeds 50000+:  per-item B1: 1/20 B2:13/20 B3:20/20 B4: 7/20 B5: 0/20   TOTAL  41/100   pooled err 16.94
+  attack seeds 77000+:  per-item B1: 2/20 B2:14/20 B3:20/20 B4: 6/20 B5: 0/20   TOTAL  42/100   pooled err 15.84
+  attack seeds 91000+:  per-item B1: 0/20 B2: 8/20 B3:20/20 B4: 6/20 B5: 0/20   TOTAL  34/100   pooled err 13.23
+  review1 published: 36/100 (50000+) and 40/100 (77000+)
+
+DONE

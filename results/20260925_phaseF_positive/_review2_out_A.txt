@@ -1,0 +1,81 @@
+========================================================================================================
+A  H-A3'(e) SEPARATION TEST -- B-group settled error, d=0.20
+   gate as written: B-group settled err <= 1.5 x pole's quoted 2.19 = 3.28
+========================================================================================================
+                       policy     B1     B2     B3     B4     B5    TOTAL  errB1  errB2  errB3  errB4  errB5 errB_pooled  nom_err
+                pole (anchor)    0/20   0/20   0/20   0/20   0/20     0/100   6.17  3.35  3.72  3.14  3.55        3.99     2.24
+                  zero action    0/20   0/20   0/20   0/20   0/20     0/100 105.09104.19110.55106.55108.29      106.93   113.52
+                         P+FF    3/20   0/20   0/20   0/20   0/20     3/100   9.86  2.59  2.81  2.65  3.24        4.23     2.54
+       freeze gap<0.40 c>0.20    3/20   0/20   0/20   0/20   0/20     3/100   9.74  2.61  2.82  2.71  3.31        4.24     2.59
+       freeze gap<0.30 c>0.15    3/20   0/20   0/20   0/20   0/20     3/100   9.89  2.60  2.90  2.74  3.23        4.27     2.55
+       freeze gap<0.50 c>0.25    3/20   0/20   0/20   0/20   0/20     3/100   9.76  2.59  2.82  2.67  3.31        4.23     2.56
+   freeze time c>0.35 hold0.4    1/20   0/20   0/20   0/20   0/20     1/100   6.22  5.13  5.17  7.96 10.79        7.05     7.01
+              lowgain kp=0.15    0/20   0/20   0/20   0/20   0/20     0/100  22.91 20.63 25.32 21.44 23.03       22.67    22.58
+           biggap target 0.50    0/20   0/20   0/20   0/20   0/20     0/100  60.29 59.95 61.40 60.19 61.07       60.58    60.01
+                   clamp only    3/20   0/20   0/20   0/20   0/20     3/100   9.86  2.59  2.81  2.65  3.24        4.23     2.54
+                   brake only    0/20   0/20   0/20   0/20   0/20     0/100   6.17  3.35  3.72  3.14  3.55        3.99     2.24
+
+========================================================================================================
+A2  VERDICT LINES (per-item gate, gate value 3.28)
+========================================================================================================
+  pole nominal err (the number 2.19 came from)   : 2.24
+  pole B-group POOLED settled err                : 3.99
+  gate value in the plan (1.5 x nominal)         : 3.37
+  gate value if anchored to the pole's B group   : 5.98
+
+                       policy  B-group pooled  pass@3.28  pass@1.5xPoleB
+                pole (anchor)            3.99    fail       PASS
+                  zero action          106.93    fail       fail
+                         P+FF            4.23    fail       PASS
+       freeze gap<0.40 c>0.20            4.24    fail       PASS
+       freeze gap<0.30 c>0.15            4.27    fail       PASS
+       freeze gap<0.50 c>0.25            4.23    fail       PASS
+   freeze time c>0.35 hold0.4            7.05    fail       fail
+              lowgain kp=0.15           22.67    fail       fail
+           biggap target 0.50           60.58    fail       fail
+                   clamp only            4.23    fail       PASS
+                   brake only            3.99    fail       PASS
+
+  per-item: does the pole pass its OWN gate on every B item?
+    B1: pole   6.17  vs gate 3.28 -> FAIL
+    B2: pole   3.35  vs gate 3.28 -> FAIL
+    B3: pole   3.72  vs gate 3.28 -> FAIL
+    B4: pole   3.14  vs gate 3.28 -> PASS
+    B5: pole   3.55  vs gate 3.28 -> FAIL
+
+  per-item: freeze degenerates vs gate 3.28
+    freeze gap<0.40 c>0.20
+      B1:   9.74  vs 3.28 -> FAIL
+      B2:   2.61  vs 3.28 -> PASS
+      B3:   2.82  vs 3.28 -> PASS
+      B4:   2.71  vs 3.28 -> PASS
+      B5:   3.31  vs 3.28 -> FAIL
+    freeze gap<0.30 c>0.15
+      B1:   9.89  vs 3.28 -> FAIL
+      B2:   2.60  vs 3.28 -> PASS
+      B3:   2.90  vs 3.28 -> PASS
+      B4:   2.74  vs 3.28 -> PASS
+      B5:   3.23  vs 3.28 -> PASS
+    freeze time c>0.35 hold0.4
+      B1:   6.22  vs 3.28 -> FAIL
+      B2:   5.13  vs 3.28 -> FAIL
+      B3:   5.17  vs 3.28 -> FAIL
+      B4:   7.96  vs 3.28 -> FAIL
+      B5:  10.79  vs 3.28 -> FAIL
+
+========================================================================================================
+A3  B-group mean gap (are these policies actually tracking, or parked?)
+========================================================================================================
+                pole (anchor) B1:0.231 B2:0.214 B3:0.218 B4:0.214 B5:0.218 
+                  zero action B1:0.725 B2:0.721 B3:0.753 B4:0.733 B5:0.741 
+                         P+FF B1:0.238 B2:0.201 B3:0.204 B4:0.202 B5:0.205 
+       freeze gap<0.40 c>0.20 B1:0.238 B2:0.202 B3:0.205 B4:0.202 B5:0.208 
+       freeze gap<0.30 c>0.15 B1:0.239 B2:0.202 B3:0.207 B4:0.202 B5:0.207 
+       freeze gap<0.50 c>0.25 B1:0.238 B2:0.202 B3:0.204 B4:0.202 B5:0.207 
+   freeze time c>0.35 hold0.4 B1:0.220 B2:0.215 B3:0.216 B4:0.229 B5:0.243 
+              lowgain kp=0.15 B1:0.312 B2:0.302 B3:0.327 B4:0.306 B5:0.315 
+           biggap target 0.50 B1:0.501 B2:0.500 B3:0.507 B4:0.501 B5:0.505 
+                   clamp only B1:0.238 B2:0.201 B3:0.204 B4:0.202 B5:0.205 
+                   brake only B1:0.231 B2:0.214 B3:0.218 B4:0.214 B5:0.218 
+
+DONE
