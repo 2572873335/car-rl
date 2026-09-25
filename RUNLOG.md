@@ -1474,3 +1474,37 @@ c_max = safety · sqrt(2 · a_max_lo · (gap − COLLISION_GAP − margin))
   - 评审通过后进 **Step 1：攻击者训练**（H-A1' 双 60%，3 天硬门）。
 
 ---
+
+## [2026-09-25] 脚本落点口径说明（**回应 review1 重要项 6**）
+
+- **动作**: 纯文档；核对 `DATA_MANAGEMENT.md` §2 目录规范并说明 Phase F 脚本的落点依据
+- **评审意见**: `train_attacker.py` 在仓库根、`eval_attacker.py` 在 `results/`，
+  与 §2「实验产物进 `results/YYYYMMDD_<名>/`」不一致，建议归位或说明理由。
+
+**核对结论：既有先例是「可复用工具进根部、一次性实验脚本进 results」。**
+
+```
+根部（可复用模块 / 主训练与评估入口）:
+  follow_env.py  overtake_env.py  car_following_sim.py   ← 环境
+  train_ppo.py   train_ot.py                            ← 主训练入口
+  robustness_sweep.py  export_demos.py  rq2_offline.py  ← 可复用评估/工具
+results/…/（一次性、与某次实验绑定）:
+  results/20260922_D0_scenario_audit/d0_sweep.py
+  results/20260922_D0_regime_ext/{step05_gate.py, eval_d05_d07.py}
+  results/20260925_phaseF_step05/{step05_train.py, step05_gate2.py}
+```
+
+**按此口径处置**：
+
+| 文件 | 落点 | 依据 |
+|---|---|---|
+| `adversary_env.py` | **根** | 环境模块，与 `follow_env.py`/`gain_sched_env.py` 同类 |
+| `train_attacker.py` | **根** | 主训练入口，与 `train_ppo.py`/`train_ot.py` 同类 |
+| `eval_attacker.py` | **根**（自 `results/` **归位**） | 可复用评估harness，与 `robustness_sweep.py` 同类；H-A1' 的门在 Step 1/2/3 要反复调用，不是一次性产物 |
+| 各次跑的原始输出/图 | `results/20260925_phaseF_attacker/` | §2 要求；**训练完补 `config.json`**（§2 清单第一项） |
+
+**⇒ `eval_attacker.py` 已按上一行归位到根**；其余维持，理由如上。
+**遗留**：Step 1 训练结束后须在 `results/20260925_phaseF_attacker/` 补 `config.json`
+（seed / timesteps / n_envs / git commit / 超参），此项**开跑时一并写入**。
+
+---
