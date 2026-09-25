@@ -1,0 +1,118 @@
+======================================================================================================================
+R13  CRITERION ATTACK -- degenerate strategy zoo vs H-A3'(a)-(f)
+     judgement domain B* = B1..B5 (5 items) + B6 hard step-down 0.1/0.2/0.4 s
+     20 episodes/item, env seeds 60000+k, attack seeds 50000+k, d=0.20
+     harness: new policy instance + reset() before EVERY episode (all policies)
+======================================================================================================================
+
+POLE ANCHOR on B*: crash 0/160  pooled(all) 4.53  pooled(B1-5) 3.99  pooled(B6) 5.44
+          B1  crash  0/20  err    6.17  meangap 0.231  terms {'timeout': 20}
+          B2  crash  0/20  err    3.35  meangap 0.214  terms {'timeout': 20}
+          B3  crash  0/20  err    3.72  meangap 0.218  terms {'timeout': 20}
+          B4  crash  0/20  err    3.14  meangap 0.214  terms {'timeout': 20}
+          B5  crash  0/20  err    3.55  meangap 0.218  terms {'timeout': 20}
+      B6-0.1  crash  0/20  err    1.49  meangap 0.204  terms {'timeout': 20}
+      B6-0.2  crash  0/20  err    6.93  meangap 0.234  terms {'timeout': 20}
+      B6-0.4  crash  0/20  err    7.89  meangap 0.239  terms {'timeout': 20}
+
+NAMED BASELINE (frozen v1 RL) on B*: crash 42/160
+          B1  crash  1/20  err    9.13  terms {'timeout': 19, 'collision': 1}
+          B2  crash 12/20  err   22.39  terms {'timeout': 8, 'collision': 12}
+          B3  crash 20/20  err   36.23  terms {'collision': 20}
+          B4  crash  5/20  err   10.00  terms {'timeout': 15, 'collision': 5}
+          B5  crash  0/20  err    7.02  terms {'timeout': 20}
+      B6-0.1  crash  0/20  err    6.39  terms {'timeout': 20}
+      B6-0.2  crash  0/20  err    1.90  terms {'timeout': 20}
+      B6-0.4  crash  4/20  err   16.29  terms {'timeout': 16, 'collision': 4}
+    pooled(B1-5) 16.95   pooled(all) 13.67
+
+GATES: (b) crash <= 16.0/160   (c) crash <= 21.0/160 (50% of v1=42)   (e') pooled err <= 6.80 (1.5 x pole pooled 4.53)
+      (b15) crash <= 10.0/100 if domain NOT extended by B6
+
+======================================================================================================================
+ZOO  (crash counts are total over B*, then split B1-5 | B6)
+======================================================================================================================
+                        policy       logic  crashB*  crashB15  crashB6  errB15   errB6   errB*    nom  frozen% (b) (c) (e') (f)  VERDICT
+                 pole (anchor)         YES     0/160      0/100     0/60    3.99    5.44    4.53   2.24            Y   Y    Y   Y  PASS
+                   P+FF kp=0.8        NONE    63/160      3/100    60/60    4.23   44.06   19.16   2.54            n   n    n   Y  fail
+                   zero action        NONE     0/160      0/100     0/60  106.93  103.89  105.79 113.52            Y   Y    n   Y  fail
+                 random action        NONE    69/160      9/100    60/60  205.54   43.87  144.91 279.24            n   n    n   Y  fail
+                  P+FF kp=0.15        NONE    58/160      0/100    58/60   22.67   37.90   28.38  22.58            n   n    n   Y  fail
+                  P+FF kp=0.25        NONE    61/160      1/100    60/60   10.75   38.72   21.23  10.29            n   n    n   Y  fail
+                  P+FF kp=0.40        NONE    61/160      1/100    60/60    5.20   39.87   18.20   4.92            n   n    n   Y  fail
+                  P+FF kp=0.60        NONE    62/160      2/100    60/60    3.94   42.56   18.42   3.04            n   n    n   Y  fail
+                  P+FF kp=1.20        NONE    66/160      6/100    60/60    5.45   47.86   21.35   2.26            n   n    n   Y  fail
+                  P+FF kp=2.00        NONE    68/160      8/100    60/60    6.08   49.68   22.43   1.91            n   n    n   Y  fail
+                 P only kp=0.8        NONE   159/160     99/100    60/60   48.38   52.90   50.07  63.12            n   n    n   Y  fail
+                 Pcap a+<=0.05        NONE    37/160      0/100    37/60   35.54   43.93   38.69  34.48            n   n    n   Y  fail
+                 Pcap a+<=0.10        NONE    61/160      1/100    60/60   12.47   37.11   21.71  11.21            n   n    n   Y  fail
+                 Pcap a+<=0.15        NONE    61/160      1/100    60/60    6.36   37.79   18.14   5.42            n   n    n   Y  fail
+                 Pcap a+<=0.20        NONE    61/160      1/100    60/60    4.21   38.49   17.07   3.50            n   n    n   Y  fail
+                 Pcap a+<=0.30        NONE    61/160      1/100    60/60    3.15   40.14   17.02   2.70            n   n    n   Y  fail
+                 Pcap a+<=0.50        NONE    62/160      2/100    60/60    3.60   42.69   18.26   2.55            n   n    n   Y  fail
+               biggapplus 0.05        NONE    61/160      2/100    59/60   11.34   42.74   23.11  10.37            n   n    n   Y  fail
+               biggapplus 0.10        NONE    60/160      2/100    58/60   21.13   42.45   29.13  20.29            n   n    n   Y  fail
+               biggapplus 0.20        NONE    56/160      2/100    54/60   40.72   42.09   41.23  40.16            n   n    n   Y  fail
+               biggapplus 0.30        NONE    24/160      0/100    24/60   60.58   42.32   53.73  60.01            n   n    n   Y  fail
+               biggapplus 0.50        NONE    22/160      0/100    22/60  100.20   65.35   87.13  99.82            n   n    n   Y  fail
+                crawl cap=0.15        NONE    41/160      7/100    34/60  225.97   95.03  176.87 256.19            n   n    n   Y  fail
+         freezeGap g<.25 c>.05        NONE    63/160      3/100    60/60    4.29   44.12   19.22   2.48            n   n    n   Y  fail
+         freezeGap g<.25 c>.20        NONE    63/160      3/100    60/60    4.21   44.10   19.17   2.52            n   n    n   Y  fail
+         freezeGap g<.35 c>.10        NONE    63/160      3/100    60/60    4.39   44.08   19.27   2.69            n   n    n   Y  fail
+         freezeGap g<.35 c>.20        NONE    63/160      3/100    60/60    4.20   44.07   19.15   2.59            n   n    n   Y  fail
+         freezeGap g<.45 c>.10        NONE    63/160      3/100    60/60    4.67   43.96   19.40   2.80            n   n    n   Y  fail
+         freezeGap g<.45 c>.20        NONE    63/160      3/100    60/60    4.26   43.94   19.14   2.60            n   n    n   Y  fail
+         freezeGap g<.60 c>.20        NONE    63/160      3/100    60/60    4.36   42.90   18.81   2.68            n   n    n   Y  fail
+       freezeTime c>.20 hold.2        NONE    61/160      1/100    60/60   15.45   40.22   24.74  19.76            n   n    n   Y  fail
+       freezeTime c>.35 hold.4        NONE    61/160      1/100    60/60    7.05   39.88   19.36   7.01            n   n    n   Y  fail
+       freezeTime c>.50 hold.8        NONE    61/160      1/100    60/60    4.99   41.57   18.71   3.96            n   n    n   Y  fail
+           catchFreeze |e|<.02        NONE    64/160      4/100    60/60    7.39   44.16   21.18   3.80            n   n    n   Y  fail
+           catchFreeze |e|<.05        NONE    63/160      3/100    60/60   11.82   44.12   23.93   9.49            n   n    n   Y  fail
+           catchFreeze |e|<.10        NONE    57/160      3/100    54/60   20.26   45.11   29.58  17.40            n   n    n   Y  fail
+  catchFreeze |e|<.02 &|de|<.02        NONE    63/160      3/100    60/60    6.71   44.06   20.71   3.74            n   n    n   Y  fail
+  catchFreeze |e|<.05 &|de|<.05        NONE    63/160      3/100    60/60   11.38   44.06   23.63   8.95            n   n    n   Y  fail
+           catchFreeze gap<.22        NONE    64/160      4/100    60/60    7.39   44.16   21.18   3.80            n   n    n   Y  fail
+           catchFreeze gap<.25        NONE    63/160      3/100    60/60   11.82   44.12   23.93   9.49            n   n    n   Y  fail
+           catchFreeze gap<.30        NONE    57/160      3/100    54/60   20.26   45.11   29.58  17.40            n   n    n   Y  fail
+    capFreeze a+<=0.10 |e|<.03        NONE    61/160      1/100    60/60   15.54   37.11   23.63  13.60            n   n    n   Y  fail
+    capFreeze a+<=0.20 |e|<.03        NONE    61/160      1/100    60/60    8.51   38.49   19.75   7.06            n   n    n   Y  fail
+    capFreeze a+<=0.30 |e|<.03        NONE    61/160      1/100    60/60    7.05   40.14   19.46   5.52            n   n    n   Y  fail
+    capFreeze a+<=0.30 |e|<.05        NONE    61/160      1/100    60/60   10.38   40.14   21.54   8.12            n   n    n   Y  fail
+    capFreeze a+<=0.50 |e|<.03        NONE    63/160      3/100    60/60    8.12   42.72   21.09   5.53            n   n    n   Y  fail
+        clamp only (pole abl.)  NO(broken)    63/160      3/100    60/60    4.23   44.06   19.16   2.54            n   n    n   Y  fail
+        brake only (pole abl.)         YES     0/160      0/100     0/60    3.99    5.44    4.53   2.24            Y   Y    Y   Y  PASS
+               freeze-envelope YES(brake->0)    62/160      2/100    60/60    3.55   42.63   18.21   2.54            n   n    n   Y  fail
+            threshBrake g<0.20         YES    22/160      1/100    21/60    5.35   26.53   13.30   3.04            n   n    n   Y  fail
+            threshBrake g<0.25         YES     5/160      1/100     4/60   16.43   17.30   16.76  10.74            Y   Y    n   Y  fail
+            threshBrake g<0.30         YES     1/160      1/100     0/60   28.03   22.51   25.96  20.39            Y   Y    n   Y  fail
+
+elapsed 1452.2s
+
+======================================================================================================================
+THE ANSWER: passers of the full conjunction, by logic class
+======================================================================================================================
+
+  logic=NO(broken):  PASS 0/1
+      (fail: 1)
+
+  logic=NONE:  PASS 0/45
+      (fail: 45)
+
+  logic=YES:  PASS 2/5
+      PASS  pole (anchor)
+      PASS  brake only (pole abl.)
+      (fail: 3)
+
+  logic=YES(brake->0):  PASS 0/1
+      (fail: 1)
+
+  ALL PASSERS:
+                   pole (anchor)  logic=        YES  crash 0/160  errB* 4.53  nom 2.24   [envelope full brake, 2.4-8.1% of steps]
+          brake only (pole abl.)  logic=        YES  crash 0/160  errB* 4.53  nom 2.24   [review1: 0/220]
+
+  NEAR-MISSES (fail exactly one clause):
+                     zero action  fails e   crash 0/160  errB* 105.79
+              threshBrake g<0.25  fails e   crash 5/160  errB* 16.76
+              threshBrake g<0.30  fails e   crash 1/160  errB* 25.96
+
+DONE

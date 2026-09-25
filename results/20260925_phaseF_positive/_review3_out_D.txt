@@ -1,0 +1,26 @@
+====================================================================================================
+C4  COUNTERFACTUAL: (b)(c)(e') graded on B1-B5 ONLY (no B6) -- review2's channel
+====================================================================================================
+  v1 baseline on B1-B5: crash 38/100 (per-item B1:1 B2:12 B3:20 B4:5 B5:0)  pooled err 16.95
+  pole on B1-B5:       crash 0/100  pooled err 3.99
+  gates: (b15)<=10/100  (c15)<=19.0/100  (e15')<=5.98
+
+                          policy  crash15  errB15    nom  (b15)(c15)(e15')  VERDICT
+                   pole (anchor)     0/100    3.99   2.24     Y    Y     Y   PASS
+                   Pcap a+<=0.30     1/100    3.15   2.70     Y    Y     Y   PASS
+                   Pcap a+<=0.50     2/100    3.60   2.55     Y    Y     Y   PASS
+                    P+FF kp=0.60     2/100    3.94   3.04     Y    Y     Y   PASS
+                    P+FF kp=0.40     1/100    5.20   4.92     Y    Y     Y   PASS
+           freezeGap g<.35 c>.20     3/100    4.20   2.59     Y    Y     Y   PASS
+                      clamp only     3/100    4.23   2.54     Y    Y     Y   PASS
+                     zero action     0/100  106.93 113.52     Y    Y     n   fail
+                      brake only     0/100    3.99   2.24     Y    Y     Y   PASS
+
+====================================================================================================
+D2  TARGETED RESET TRAP: pole reused across episodes without reset, B6 family
+====================================================================================================
+  reset=True: B1:0/20(e6.2)  B2:0/20(e3.4)  B3:0/20(e3.7)  B4:0/20(e3.1)  B5:0/20(e3.6)  B6-0.1:0/20(e1.5)  B6-0.2:0/20(e6.9)  B6-0.4:0/20(e7.9)
+  reset=False: B1:0/20(e7.7)  B2:0/20(e5.4)  B3:0/20(e6.7)  B4:0/20(e5.9)  B5:0/20(e7.2)  B6-0.1:0/20(e1.6)  B6-0.2:0/20(e6.9)  B6-0.4:0/20(e7.9)
+
+  NOTE: shows the reset-dependence of a STATEFUL policy's readings.
+DONE

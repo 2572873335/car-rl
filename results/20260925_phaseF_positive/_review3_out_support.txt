@@ -1,0 +1,51 @@
+====================================================================================================
+C1  THE RESET TRAP -- pole with per-episode reset() vs without
+====================================================================================================
+  (positive pole and zero-action both measured under the two harnesses)
+
+  policy            harness              B1     B2   B6-0.2   errB1   errB2  errB6-0.2
+              pole      reset every ep    0/20   0/20   0/20    6.17    3.35    6.93
+              pole            NO reset    0/20   0/20   0/20    7.72    5.40    7.11
+              P+FF      reset every ep    3/20   0/20  20/20    9.86    2.59   43.68
+              P+FF            NO reset    3/20   0/20  20/20    9.86    2.59   43.68
+
+====================================================================================================
+C2  DELIVERED vs COMMANDED attack strength at d=0.20 (plan 2.3.1(i) generalised)
+====================================================================================================
+      item  cmd mean   cmd pp  ACTUAL mean  ACTUAL pp
+        B1     0.503    0.900        0.503      0.900
+        B2     0.500    1.000        0.502      0.950
+        B3     0.506    0.900        0.506      0.900
+        B4     0.525    0.946        0.525      0.946
+        B5     0.888    0.900        0.888      0.900
+    B6-0.1     0.500    0.900        0.500      0.900
+    B6-0.2     0.501    0.900        0.501      0.900
+    B6-0.4     0.500    0.900        0.500      0.900
+
+====================================================================================================
+C3  EXTRA NO-LOGIC / LOW-LOGIC SHAPES on B*
+====================================================================================================
+  gates: (b)<=16/160  (c)<=21/160  (e')<=6.80
+                          policy    crash  errB15   errB6   errB*    nom  (b)(c)(e')  VERDICT
+               always brake a=-1     0/160  241.13  245.80  242.88 253.96  Y Y   n   fail
+            always throttle a=+1   160/160   52.03   53.55   52.60  63.90  n n   n   fail
+              freezeOnRate c>.10     0/160  175.93  191.96  181.94 124.27  Y Y   n   fail
+              freezeOnRate c>.20     0/160  126.20  126.35  126.26 115.44  Y Y   n   fail
+              freezeOnRate c>.35     0/160  108.31  103.89  106.65 113.52  Y Y   n   fail
+               PcapSigned +-0.10    61/160   12.47   37.11   21.71  11.21  n n   n   fail
+               PcapSigned +-0.30    61/160    3.15   40.14   17.02   2.70  n n   n   fail
+               PcapSigned +-0.60    62/160    3.57   43.80   18.66   2.55  n n   n   fail
+                     P+FF kp=4.0    92/160   18.51   49.86   30.27   1.33  n n   n   fail
+                     P+FF kp=8.0   115/160   25.71   51.80   35.49  55.66  n n   n   fail
+
+====================================================================================================
+C4  COUNTERFACTUAL: (b)(c)(e') graded on B1-B5 ONLY (no B6) -- review2's channel
+====================================================================================================
+Traceback (most recent call last):
+  File "/home/zy/car_rl/code0919/results/20260925_phaseF_positive/_review3_probe_support.py", line 208, in <module>
+    v1c, v1e, _, _ = C.evaluate(lambda: np.array([0.0], dtype=np.float32), n_ep=20)
+                     ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zy/car_rl/code0919/results/20260925_phaseF_positive/_review3_core.py", line 475, in evaluate
+    obs, r, term_, trunc, _ = env.step(pol(obs))
+                                       ~~~^^^^^
+TypeError: 'numpy.ndarray' object is not callable

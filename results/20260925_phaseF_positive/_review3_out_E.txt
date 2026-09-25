@@ -1,0 +1,80 @@
+======================================================================================================================
+E  SPACING SENSITIVITY of H-A3' on B* -- does the hard family stay alive at d=1.0?
+======================================================================================================================
+
+---- d_des = 0.20 ----
+             policy     crash      B15      B6   errB15    errB6    errB*   gapB6    nom
+      pole (anchor)     0/160     0/100    0/60     3.99     5.44     4.53   0.226   2.24
+        zero action     0/160     0/100    0/60   106.93   103.89   105.79   0.719 113.52
+        P+FF kp=0.8    63/160     3/100   60/60     4.23    44.06    19.16   0.400   2.54
+      Pcap a+<=0.30    61/160     1/100   60/60     3.15    40.14    17.02   0.382   2.70
+         brake only     0/160     0/100    0/60     3.99     5.44     4.53   0.226   2.24
+   v1 RL (baseline)    42/160    38/100    4/60    16.95     8.19    13.67   0.210   2.26
+
+---- d_des = 0.50 ----
+             policy     crash      B15      B6   errB15    errB6    errB*   gapB6    nom
+      pole (anchor)     0/160     0/100    0/60     4.88    21.17    10.99   0.404   4.52
+        zero action     0/160     0/100    0/60    60.69    60.36    60.57   0.719  60.43
+        P+FF kp=0.8    24/160     0/100   24/60     5.00    33.91    15.84   0.402   4.52
+      Pcap a+<=0.30    24/160     0/100   24/60     4.89    35.61    16.41   0.384   4.52
+         brake only     0/160     0/100    0/60     4.88    21.17    10.99   0.404   4.52
+   v1 RL (baseline)     0/160     0/100    0/60     6.50     3.53     5.38   0.487   2.46
+
+---- d_des = 1.00 ----
+             policy     crash      B15      B6   errB15    errB6    errB*   gapB6    nom
+      pole (anchor)     0/160     0/100    0/60     5.52    47.08    21.11   0.769   3.66
+        zero action     0/160     0/100    0/60    63.77    65.35    64.37   0.719  55.57
+        P+FF kp=0.8     4/160     0/100    4/60     5.52    45.50    20.51   0.777   3.66
+      Pcap a+<=0.30     4/160     0/100    4/60     5.52    45.50    20.51   0.777   3.66
+         brake only     0/160     0/100    0/60     5.52    47.08    21.11   0.769   3.66
+   v1 RL (baseline)     0/160     0/100    0/60     6.80     5.00     6.12   0.979   2.35
+
+======================================================================================================================
+E2  SIX-CLAUSE VERDICT PER SPACING  (gates recomputed at each spacing from the
+    frozen v1 baseline and from the pole's own pooled value at that spacing)
+======================================================================================================================
+
+  d=0.20:  v1 crash 42/160 -> (b)<=16, (c)<=21;  pole pooled 4.53 -> (e')<=6.80
+               policy     crash    errB*   (b) (c) (e')  VERDICT
+        pole (anchor)     0/160     4.53   Y Y   Y   PASS   [YES]
+          zero action     0/160   105.79   Y Y   n   fail   [NONE]
+          P+FF kp=0.8    63/160    19.16   n n   n   fail   [NONE]
+        Pcap a+<=0.30    61/160    17.02   n n   n   fail   [NONE]
+           brake only     0/160     4.53   Y Y   Y   PASS   [YES]
+     v1 RL (baseline)    42/160    13.67   n n   n   fail   [RL]
+
+  d=0.50:  v1 crash 0/160 -> (b)<=16, (c)<=0;  pole pooled 10.99 -> (e')<=16.49
+               policy     crash    errB*   (b) (c) (e')  VERDICT
+        pole (anchor)     0/160    10.99   Y Y   Y   PASS   [YES]
+          zero action     0/160    60.57   Y Y   n   fail   [NONE]
+          P+FF kp=0.8    24/160    15.84   n n   Y   fail   [NONE]
+        Pcap a+<=0.30    24/160    16.41   n n   Y   fail   [NONE]
+           brake only     0/160    10.99   Y Y   Y   PASS   [YES]
+     v1 RL (baseline)     0/160     5.38   Y Y   Y   PASS   [RL]
+
+  d=1.00:  v1 crash 0/160 -> (b)<=16, (c)<=0;  pole pooled 21.11 -> (e')<=31.66
+               policy     crash    errB*   (b) (c) (e')  VERDICT
+        pole (anchor)     0/160    21.11   Y Y   Y   PASS   [YES]
+          zero action     0/160    64.37   Y Y   n   fail   [NONE]
+          P+FF kp=0.8     4/160    20.51   Y n   Y   fail   [NONE]
+        Pcap a+<=0.30     4/160    20.51   Y n   Y   fail   [NONE]
+           brake only     0/160    21.11   Y Y   Y   PASS   [YES]
+     v1 RL (baseline)     0/160     6.12   Y Y   Y   PASS   [RL]
+
+======================================================================================================================
+E3  DELIVERED vs COMMANDED leader speed (ACTUAL = leader's own Car.v).
+    The frozen env logs v_l = the COMMAND; the leader's delivered speed is not
+    logged, so it is captured with an instrumented subclass here.
+======================================================================================================================
+
+  d=0.20
+      B6-0.1  cmd mean 0.500 pp 0.900 -> ACTUAL mean 0.130 pp 0.200   delivered/commanded pp ratio 0.22
+      B6-0.2  cmd mean 0.501 pp 0.900 -> ACTUAL mean 0.233 pp 0.360   delivered/commanded pp ratio 0.40
+      B6-0.4  cmd mean 0.500 pp 0.900 -> ACTUAL mean 0.372 pp 0.650   delivered/commanded pp ratio 0.72
+
+  d=1.00
+      B6-0.1  cmd mean 0.500 pp 0.900 -> ACTUAL mean 0.130 pp 0.200   delivered/commanded pp ratio 0.22
+      B6-0.2  cmd mean 0.501 pp 0.900 -> ACTUAL mean 0.233 pp 0.360   delivered/commanded pp ratio 0.40
+      B6-0.4  cmd mean 0.500 pp 0.900 -> ACTUAL mean 0.372 pp 0.650   delivered/commanded pp ratio 0.72
+
+DONE
