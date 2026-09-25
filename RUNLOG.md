@@ -1561,3 +1561,80 @@ _review3_run.py     (deleted)  = 1f8f0ab2...  ==  _review3_probe_zoo.py     (kep
 - **产物**: `results/20260925_phaseF_positive/{_verify_review3_F1.py,_out_verify_F1.txt}`
 
 ---
+
+## [2026-09-26] Phase F Step 1：攻击者训练完成，**H-A1' 未通过（0/20 对两个防御方）**
+
+- **命令**:
+  ```
+  uv run python train_attacker.py --which both --timesteps 5000000 --n-envs 16 --seed 0
+  uv run python eval_attacker.py --ckpt results/20260925_phaseF_attacker/attacker_vs_both.zip --n-ep 20
+  uv run python results/20260925_phaseF_attacker/_diag_hA1_failure.py
+  ```
+- **更新次数（铁律 4）**: 5M/(16×256) = **1221** ≥ 300 ✅
+- **机器状态披露（F8）**: 跑前 `pgrep` 为空；训练 20 进程独占；内存稳定 12 GB
+- **config.json**: 已落 `results/20260925_phaseF_attacker/config.json`（§2 要求）
+
+### 1. 首跑 **OOM 被杀**（如实披露，已修正）
+
+首次以 `--n-envs 32` 启动，**1 个 iteration 后进程消失且退出码 0**。经查 `dmesg`：
+
+```
+Out of memory: Killed process (python) total-vm:49061904kB, anon-rss:759280kB
+```
+
+**根因（实测）**：本 env 的**每个 SubprocVecEnv worker 都各自加载一份 v1 PPO 模型**
+（torch + CUDA context）。逐档实测内存：
+
+```
+n_envs= 4: +1662 MB (~416 MB/worker)
+n_envs= 8: +3321 MB (~415 MB/worker)
+n_envs=16: +6405 MB (~400 MB/worker)
+⇒ n_envs=32 预计 ~12.8 GB，机器共 15 GB ⇒ OOM
+```
+**注意**：v1 原训练用 32 envs 无事，因为它**不加载模型**；本 env 每 worker 加载一份。
+**修正**：降到 16 envs（实测 7194 MB，安全）。**副作用**：更新数 610 → **1221**（同一 500 万步，
+梯度更新翻倍），仍高于铁律 4 下限。已写入 config.json 的 `memory_deviation` 字段。
+
+### 2. H-A1' 判定：**未通过**
+
+```
+  vs P+FF (rule)   termination audit {'timeout': 20}   CRASH 0/20 = 0%
+  vs v1 RL (frozen) termination audit {'timeout': 20}   CRASH 0/20 = 0%
+  H-A1' 阈值 ≥60% 双防御方 →  pff 0% FAIL | v1 0% FAIL   VERDICT: FAIL
+```
+
+**训练期回报**始终在 **4–12** 的低位震荡（撞车会 +500），即**攻击者从未稳定地造成碰撞**。
+`ep_len_mean` 稳定在 1000（回合跑满）⇒ 策略在扰动但不足以致撞。
+平凡性诊断：攻击者 leader-speed std ≈ **0.41**（方波族 0.45、正弦族 0.25–0.32）
+⇒ 它学到了"波动"，但**不是**致撞的那条。
+
+### 3. 失败归因：**搜索失败，不是环境缺陷**（已实测分离）
+
+`_diag_hA1_failure.py` 用**同一个 `AttackerEnv`** 驱动脚本化的全幅方波
+（把目标速度反解成攻击者动作，路径与训练完全一致）：
+
+```
+  vs   P+FF, step-down 0.1s: 20/20 crashes      vs   P+FF, 0.2s: 20/20    0.4s: 20/20
+  vs  v1 RL, step-down 0.1s: 18/20 crashes      vs  v1 RL, 0.2s: 18/20    0.4s: 13/20
+```
+
+**⇒ 攻击面完好**（脚本攻击经同一路径仍能致撞），且**动作范围足够**
+（可达 leader 速度 0.05–0.95，正是方波所需）。
+**⇒ 学习器没有找到那条解**——是**搜索问题**，不是 wrapper 破坏了攻击面。
+
+**注意这与 plan §5-R1 预判的失败模式不同**：R1 预期的是"攻击者只学到平凡解（反而过门）"，
+实际是**根本没找到致撞解**。**该结果模式未被风险表覆盖，如实记录。**
+
+- **验收结论**: Step 1 **H-A1' 未通过（0/20 双防御方）**；归因为**搜索失败**
+  （攻击面经同一路径验证完好）；**按 plan §6 的时间盒与门禁，Step 1 不达标即停，
+  不进入 Step 2**，除非 owner 另裁
+- **产物**: `results/20260925_phaseF_attacker/{config.json, train_attacker_n16.log,
+  attacker_vs_both.zip, eval_attacker.txt, _diag_hA1_failure.py}`
+- **遗留 / 下一步（待 owner 裁决，不擅自开跑）**:
+  1. **诊断增强**：撞车奖励稀疏（+500 只在终端），可试**奖励塑形**（如按收距率的 PBRS）
+     或**课程**（先对弱防御方，再对 P+FF/v1）；
+  2. **或**：接受 H-A1' 未过，**如实报为 Phase F 的负结果**（与 D0 上界并列），转 Step 3.5/Phase E；
+  3. **或**：改判据形态（plan R1 的备选：轨迹相似度检验），但**本例是"没找到解"而非
+     "找到平凡解"**，该备选**不适用**。
+
+---

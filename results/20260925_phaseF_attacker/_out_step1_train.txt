@@ -1,0 +1,13 @@
+=== Phase F Step 1 attacker training (n_envs=16, 5M steps, 1221 updates) ===
+|    n_updates            | 12180        |
+|    ep_rew_mean          | 8.95       |
+|    iterations           | 1220       |
+|    n_updates            | 12190      |
+|    ep_rew_mean          | 9.99         |
+|    iterations           | 1221         |
+|    n_updates            | 12200        |
+[attacker vs both] saved -> /home/zy/car_rl/code0919/results/20260925_phaseF_attacker/attacker_vs_both.zip
+
+=== OOM evidence (first attempt, n_envs=32) ===
+[702635.993424] oom-kill:constraint=CONSTRAINT_NONE,nodemask=(null),cpuset=/,mems_allowed=0,global_oom,task_memcg=/,task=python,pid=1740332,uid=1000
+[702635.993502] Out of memory: Killed process 1740332 (python) total-vm:49061904kB, anon-rss:759280kB, file-rss:0kB, shmem-rss:79872kB, UID:1000 pgtables:4868kB oom_score_adj:0

@@ -1,0 +1,42 @@
+{
+  "experiment": "phaseF_step1_attacker",
+  "purpose": "H-A1' gate: one attacker must reach >=60% crash rate against BOTH frozen defenders (P+FF and v1 RL). A single-attacker config is required: training one attacker per defender would yield two policies and would not satisfy the criterion, which is non-empty only because no known degenerate script defeats both.",
+  "defenders": [
+    "P+FF (baseline_action use_ff=True)",
+    "v1 RL (follow_stage2_final_v1.zip)"
+  ],
+  "defender_resampling": "per episode, inside a single env (BothDefenders)",
+  "policy": "PPO MlpPolicy[128,128]",
+  "hyperparameters": {
+    "learning_rate": 0.0003,
+    "n_steps": 256,
+    "batch_size": 512,
+    "gamma": 0.99,
+    "gae_lambda": 0.95,
+    "clip_range": 0.2,
+    "ent_coef": 0.01,
+    "n_envs": 16
+  },
+  "timesteps": 5000000,
+  "updates": 1220,
+  "iron_rule_4": "1220 >= 300 satisfied",
+  "seed": 0,
+  "load_from": null,
+  "d_des": 0.2,
+  "attacker_reward": {
+    "W_ERR": 0.1,
+    "W_CRASH": 500.0,
+    "W_IDLE": 0.05,
+    "sign_note": "attacker is PAID for large |e| (the negation of the follower's -(e/0.12)**2 penalty); see adversary_env.py module docstring",
+    "verified_by": "_check_reward_scale.py: bang-bang 511.3 vs idle -13.5"
+  },
+  "git_commit": "10935f2",
+  "frozen_sha256_verified": true,
+  "memory_deviation": {
+    "planned_n_envs": 32,
+    "actual_n_envs": 16,
+    "reason": "OOM. Each SubprocVecEnv worker loads its own copy of the v1 PPO defender (torch + CUDA context, ~400 MB measured). 32 workers projected ~12.8 GB against a 15 GB machine -> dmesg confirms Out of memory: Killed process (python), total-vm 49 GB. 16 workers measured at 7194 MB, safe.",
+    "consequence": "updates rise from 610 to 1220 (5M steps / (16*256)). Same total experience, twice the gradient updates. Above the iron-rule-4 floor, so no violation.",
+    "note": "v1 stage2 used 32 envs safely because it loaded no model per worker; this env does."
+  }
+}

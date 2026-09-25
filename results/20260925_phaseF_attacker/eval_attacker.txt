@@ -1,0 +1,32 @@
+/home/zy/car_rl/code0919/.venv/lib/python3.13/site-packages/stable_baselines3/common/on_policy_algorithm.py:150: UserWarning: You are trying to run PPO on the GPU, but it is primarily intended to run on the CPU when not using a CNN policy (you are using ActorCriticPolicy which should be a MlpPolicy). See https://github.com/DLR-RM/stable-baselines3/issues/1245 for more info. You can pass `device='cpu'` or `export CUDA_VISIBLE_DEVICES=` to force using the CPU.Note: The model will train, but the GPU utilization will be poor and the training might take longer than on CPU.
+  warnings.warn(
+====================================================================================
+H-A1' EVALUATION -- one attacker, both defenders
+  ckpt: results/20260925_phaseF_attacker/attacker_vs_both.zip
+====================================================================================
+
+  vs P+FF (rule)
+    termination audit (iron rule 5): {'timeout': 20}
+    CRASH RATE: 0/20 = 0%
+
+  vs v1 RL (frozen)
+    termination audit (iron rule 5): {'timeout': 20}
+    CRASH RATE: 0/20 = 0%
+
+====================================================================================
+  H-A1' threshold: >= 60% against BOTH
+     pff: 0%  FAIL
+      v1: 0%  FAIL
+  H-A1' VERDICT: FAIL
+
+====================================================================================
+  TRIVIALITY DIAGNOSTIC (reported, not gated)
+====================================================================================
+  vs  pff: attacker leader-speed std 0.418
+        square 0.1s: std 0.449
+        square 0.2s: std 0.449
+         sine 0.5Hz: std 0.318
+  vs   v1: attacker leader-speed std 0.406
+        square 0.1s: std 0.448
+        square 0.2s: std 0.443
+         sine 0.5Hz: std 0.253
