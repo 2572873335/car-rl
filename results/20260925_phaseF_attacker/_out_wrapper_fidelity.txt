@@ -1,0 +1,16 @@
+  AttackerEnv V_BASE = 0.5 (idle attacker holds leader at this speed)
+========================================================================================
+
+  seeds 2000+
+    PLAIN env, v_set=0.50 constant : coll  0/20  {'timeout': 20}
+    AttackerEnv, idle attacker     : coll 18/20  {'collision': 18, 'timeout': 2}
+    PLAIN env, v_set=0.55 constant : coll  0/20  {'timeout': 20}  (D0's boundary cell)
+
+  seeds 60000+
+    PLAIN env, v_set=0.50 constant : coll  0/20  {'timeout': 20}
+    AttackerEnv, idle attacker     : coll 16/20  {'collision': 16, 'timeout': 4}
+    PLAIN env, v_set=0.55 constant : coll  0/20  {'timeout': 20}  (D0's boundary cell)
+
+========================================================================================
+  READ: if PLAIN and AttackerEnv disagree, the wrapper is unfaithful and
+  the Step 1 diagnosis is confounded.

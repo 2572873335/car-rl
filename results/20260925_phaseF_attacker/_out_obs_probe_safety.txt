@@ -1,0 +1,22 @@
+========================================================================================
+IS _obs() SAFE TO CALL AS A SIDE PROBE?  (it reads self.prev_e)
+========================================================================================
+
+  PLAIN env (correct usage: obs from step() return)
+    reset: obs[1] = +0.000000
+    step 0: obs[1] = +0.000000   (prev_e now +0.410114)
+    step 1: obs[1] = -0.056290   (prev_e now +0.407863)
+    step 2: obs[1] = +0.080000   (prev_e now +0.411063)
+    step 3: obs[1] = -0.023720   (prev_e now +0.410114)
+
+  SIDE-PROBE usage: _obs() called separately before step()
+    reset: _obs()[1] = +0.000000
+    step 0: side-probe _obs()[1] = +0.000000   step-return obs[1] = +0.000000
+    step 1: side-probe _obs()[1] = +0.000000   step-return obs[1] = -0.056290
+    step 2: side-probe _obs()[1] = +0.000000   step-return obs[1] = +0.080000
+    step 3: side-probe _obs()[1] = +0.000000   step-return obs[1] = -0.023720
+
+  => if the side-probe column is not equal to the step-return column,
+     then calling _obs() as a probe gives a DIFFERENT (stale) value,
+     and AttackerEnv.step() -- which does exactly that -- feeds the
+     defender a wrong obs[1].

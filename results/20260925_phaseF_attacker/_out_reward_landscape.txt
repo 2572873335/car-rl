@@ -1,0 +1,21 @@
+==========================================================================================
+ATTACKER REWARD LANDSCAPE -- does the winning script score well?
+==========================================================================================
+
+  defender = P+FF
+                attack  mean reward    crash   steps
+        step-down 0.1s        515.8   20/20      98
+        step-down 0.2s        516.9   20/20     106
+        step-down 0.4s        521.3   20/20     122
+      learned attacker          8.8    0/20    1001
+                  idle         -6.6    0/20    1001
+                random         -9.5    0/20    1001
+
+  defender = v1 RL
+                attack  mean reward    crash   steps
+        step-down 0.1s        459.8   18/20     153
+        step-down 0.2s        460.7   18/20     156
+        step-down 0.4s        329.4   13/20     394
+      learned attacker         17.4    0/20    1001
+                  idle        410.3   16/20     260
+                random        301.8   12/20     449

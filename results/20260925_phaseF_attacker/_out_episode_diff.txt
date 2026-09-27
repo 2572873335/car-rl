@@ -1,0 +1,9 @@
+================================================================================
+seed 2000
+  PLAIN   : 1001 steps, term=timeout
+  WRAPPED : 62 steps, term=collision
+
+  gap  first/last: plain 0.6101/0.2118   wrapped 0.6101/0.1164
+  gap  min       : plain 0.1977   wrapped 0.1164
+  v_l  first/last: plain 0.5000/0.5000   wrapped 0.5000/0.5000
+  v_l  min       : plain 0.5000   wrapped 0.5000

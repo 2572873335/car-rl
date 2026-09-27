@@ -1,0 +1,35 @@
+/home/zy/car_rl/code0919/.venv/lib/python3.13/site-packages/stable_baselines3/common/on_policy_algorithm.py:150: UserWarning: You are trying to run PPO on the GPU, but it is primarily intended to run on the CPU when not using a CNN policy (you are using ActorCriticPolicy which should be a MlpPolicy). See https://github.com/DLR-RM/stable-baselines3/issues/1245 for more info. You can pass `device='cpu'` or `export CUDA_VISIBLE_DEVICES=` to force using the CPU.Note: The model will train, but the GPU utilization will be poor and the training might take longer than on CPU.
+  warnings.warn(
+================================================================================================
+PLAIN (t, v_l, action, v_follower, v_leader, gap)
+================================================================================================
+   (0.02, 0.5, 1.0, np.float64(0.03), np.float64(0.03), np.float64(0.6101))
+   (0.04, 0.5, 1.0, np.float64(0.06), np.float64(0.06), np.float64(0.6079))
+   (0.06, 0.5, 1.0, np.float64(0.09), np.float64(0.09), np.float64(0.6111))
+   (0.08, 0.5, 1.0, np.float64(0.12), np.float64(0.12), np.float64(0.6101))
+   (0.1, 0.5, 1.0, np.float64(0.15), np.float64(0.15), np.float64(0.611))
+   (0.12, 0.5, 1.0, np.float64(0.18), np.float64(0.18), np.float64(0.611))
+   (0.14, 0.5, 1.0, np.float64(0.21), np.float64(0.21), np.float64(0.6078))
+   (0.16, 0.5, 1.0, np.float64(0.24), np.float64(0.24), np.float64(0.6076))
+   (0.18, 0.5, 1.0, np.float64(0.27), np.float64(0.27), np.float64(0.608))
+   (0.2, 0.5, 1.0, np.float64(0.3), np.float64(0.3), np.float64(0.611))
+   (0.22, 0.5, 1.0, np.float64(0.33), np.float64(0.33), np.float64(0.6105))
+   (0.24, 0.5, 1.0, np.float64(0.36), np.float64(0.36), np.float64(0.6077))
+
+================================================================================================
+WRAPPED (t, v_l_used, _attacker_v, v_follower, v_leader, gap)
+================================================================================================
+   (0.02, 0.5, 0.5, np.float64(0.03), np.float64(0.03), np.float64(0.6101))
+   (0.04, 0.5, 0.5, np.float64(0.06), np.float64(0.06), np.float64(0.6079))
+   (0.06, 0.5, 0.5, np.float64(0.09), np.float64(0.09), np.float64(0.6111))
+   (0.08, 0.5, 0.5, np.float64(0.12), np.float64(0.12), np.float64(0.6101))
+   (0.1, 0.5, 0.5, np.float64(0.15), np.float64(0.15), np.float64(0.611))
+   (0.12, 0.5, 0.5, np.float64(0.18), np.float64(0.18), np.float64(0.611))
+   (0.14, 0.5, 0.5, np.float64(0.21), np.float64(0.21), np.float64(0.6078))
+   (0.16, 0.5, 0.5, np.float64(0.24), np.float64(0.24), np.float64(0.6076))
+   (0.18, 0.5, 0.5, np.float64(0.27), np.float64(0.27), np.float64(0.608))
+   (0.2, 0.5, 0.5, np.float64(0.3), np.float64(0.3), np.float64(0.611))
+   (0.22, 0.5, 0.5, np.float64(0.33), np.float64(0.33), np.float64(0.6105))
+   (0.24, 0.5, 0.5, np.float64(0.36), np.float64(0.36), np.float64(0.6077))
+
+  V_BASE=0.5 V_SPAN=0.45 -> idle attacker commands leader 0.500

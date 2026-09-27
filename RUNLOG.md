@@ -1638,3 +1638,83 @@ n_envs=16: +6405 MB (~400 MB/worker)
      "找到平凡解"**，该备选**不适用**。
 
 ---
+
+## [2026-09-27] ★ 发现 AttackerEnv 缺陷：防御方在整个训练中**收到 obs[1] ≡ 0**（Step 1 结论作废）
+
+- **动作**: 纯诊断（无训练、无冻结文件改动）；起因是复核"Step 1 是否真是搜索失败"
+- **机器状态披露（F8）**: 各跑前 `pgrep` 为空；全部为确定性事件计数
+
+### 1. 触发：奖励景观诊断暴露了异常
+
+为决定"奖励塑形 vs 接受负结果"，先测**已知能赢的脚本攻击在攻击者自己的奖励函数下得多少分**：
+
+```
+  defender = P+FF                                     defender = v1 RL
+    step-down 0.1s   516  (20/20 撞)                    step-down 0.1s   460  (18/20)
+    learned attacker   8.8 (0/20)                       learned attacker  17  (0/20)
+    idle             -6.6 (0/20)                        idle             410  (16/20)  ← ★
+    random           -9.5 (0/20)                        random           302  (12/20)
+```
+
+**vs P+FF 奖励景观完美**（脚本 516 vs 闲逛 ~0）⇒ 那里确实是**探索问题**。
+**但 vs v1 RL 出现异常：`idle`（什么都不做）拿到 410 分、16/20 撞车**，
+而训练后的攻击者 0/20、仅 17 分——**「不动」比「学到的策略」好得多**。
+这与 D0 记录的「v1 在 d=0.20 v=0.55 零碰撞」**直接矛盾** ⇒ 必有一方错。
+
+### 2. 定位：wrapper 与 plain env 在同一 seed、同一速度下结果相反
+
+```
+  seeds 2000+    PLAIN env, v_set=0.50 constant: 0/20 撞
+                 AttackerEnv, idle attacker     : 18/20 撞   ← DIFFER
+  seeds 60000+   PLAIN 0/20   |   AttackerEnv 16/20          ← DIFFER
+```
+
+经逐层隔离（观测对齐 → 动作对比 → 全观测向量对比），**在 step 2 定位到差异**：
+两个路径的 `obs[1]`（间距变化率）不同——plain 为 **−0.0563**，wrapper 为 **0.0000**。
+
+### 3. 根因（**代码级确认**）
+
+`follow_env.py`：
+```
+148  e = gap - D_DES
+149  de = (e - self.prev_e) / DT     ← _obs() 用 prev_e 算 de
+182  self.prev_e = e                 ← prev_e 只在 step() 末尾更新
+```
+而 `adversary_env.py:96`：
+```
+96   d_obs = self.env._obs()        ← 在 step() 之前单独调用
+97   d_act = self.defender(d_obs)
+98   obs, ... = self.env.step(d_act)
+```
+⇒ 上一步的 `step()` 末尾刚把 `prev_e` 设成当前的 `e`，
+故 `_obs()` 算出 `de = (e − e)/DT = 0`。**逐 50 步实测：全为 0.0**（plain 同点非零）。
+
+**⇒ `_obs()` 不能作为 step() 之前的旁路探针**（它有 `prev_e` 状态依赖）。
+
+### 4. 后果（**Step 1 结论作废**）
+
+- **v1 RL**：4 维输入的**第 2 槽全程为 0** ⇒ 策略一直在"看不见间距变化率"的状态下被查询；
+- **P+FF**：`baseline_action` 的 `de` 项被静默置零
+  （`a = (kp*e − de)/ACT` ⇒ 退化为 `a = kp*e/ACT`），**即前馈项失效、退化为纯 P**。
+
+⇒ **Step 1 是对着两个"残废"防御方训的**，因此：
+- **`H-A1' 0/20` 不成立**（它衡量的是残废防御方）；
+- **上一轮的归因「搜索失败，非环境缺陷」随之作废**——那是基于"攻击面完好"的
+  脚本对照（`_diag_hA1_failure.py`），**而该对照同样走这条被污染的通路**。
+
+### 5. 影响面（已 grep 确认，仅 2 处，均在 Phase F 内）
+
+```
+adversary_env.py:96      ← 训练路径（Step 1 训练、Step 0.5 冒烟）
+eval_attacker.py:120     ← H-A1' 评估路径
+```
+**不含**任何冻结文件；**不影响** D0/Phase A/Phase C/已发布结果（它们不经此 wrapper）。
+
+- **验收结论**: **Step 1 结果作废**（防御方被污染）；**修法明确**（改用 step() 返回的
+  post-step obs，或让 attacker 的 leader 命令在 step 内与防御方动作**同一拍**结算）；
+  **修复后须重跑 Step 1**，并**重跑 `_diag_hA1_failure` 的攻击面对照**
+- **产物**: `results/20260925_phaseF_attacker/_diag_{reward_landscape,wrapper_fidelity,
+  episode_diff,action_diff,decisive,callstyle,plain_obs,fullobs,obs_probe_safety,
+  training_affected}.py` 与对应 `_out_*.txt`
+
+---
