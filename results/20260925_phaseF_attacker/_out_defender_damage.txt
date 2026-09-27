@@ -1,0 +1,34 @@
+/home/zy/car_rl/code0919/.venv/lib/python3.13/site-packages/stable_baselines3/common/on_policy_algorithm.py:150: UserWarning: You are trying to run PPO on the GPU, but it is primarily intended to run on the CPU when not using a CNN policy (you are using ActorCriticPolicy which should be a MlpPolicy). See https://github.com/DLR-RM/stable-baselines3/issues/1245 for more info. You can pass `device='cpu'` or `export CUDA_VISIBLE_DEVICES=` to force using the CPU.Note: The model will train, but the GPU utilization will be poor and the training might take longer than on CPU.
+  warnings.warn(
+==============================================================================
+STEP 1 -- is slot 1 the ONLY corrupted slot?
+==============================================================================
+  slot 0 e (gap err)   : max |true - side| = 0.000000   (identical)
+  slot 1 de (gap rate) : max |true - side| = 0.221657   <-- CORRUPTED
+  slot 2 v_f (own spd) : max |true - side| = 0.000000   (identical)
+  slot 3 e_lat         : max |true - side| = 0.000000   (identical)
+
+  side-probe slot 1 is identically zero everywhere: True (max |de| on the true path = 0.2217)
+
+==============================================================================
+STEP 2 -- does the corruption change each defender's ACTION?
+==============================================================================
+
+  P+FF  (use_ff=True)
+    steps where the bug changes the action: 0/106
+    mean |delta a| = 0.000000   max = 0.000000
+    => UNTOUCHED
+
+  pure P (use_ff=False)
+    steps where the bug changes the action: 105/106
+    mean |delta a| = 0.265220   max = 0.554142
+    => DAMAGED
+
+  v1 RL (frozen)
+    steps where the bug changes the action: 16/106
+    mean |delta a| = 0.208660   max = 2.000000
+    => DAMAGED
+
+==============================================================================
+An UNTOUCHED defender means the defect cannot explain its measured result.
+==============================================================================

@@ -1,0 +1,32 @@
+====================================================================================
+A. LEARNED ATTACKER, EXISTING CHECKPOINT, BUGGY vs CORRECTED HARNESS
+   (no retraining -- same weights, only the obs path is fixed)
+====================================================================================
+
+  vs pff
+    buggy     harness:  0/20 crashes   term={'timeout': 20}
+    corrected harness:  0/20 crashes   term={'timeout': 20}
+
+  vs  v1
+    buggy     harness:  0/20 crashes   term={'timeout': 20}
+    corrected harness:  0/20 crashes   term={'timeout': 20}
+
+====================================================================================
+B. SCRIPTED STEP-DOWN, BUGGY vs CORRECTED HARNESS
+   (was the 'surface is intact' control valid?)
+====================================================================================
+  vs pff  step-down 0.1s:  buggy 20/20   corrected 20/20
+  vs pff  step-down 0.2s:  buggy 20/20   corrected 20/20
+  vs pff  step-down 0.4s:  buggy 20/20   corrected 20/20
+  vs  v1  step-down 0.1s:  buggy 18/20   corrected  0/20
+  vs  v1  step-down 0.2s:  buggy 18/20   corrected  0/20
+  vs  v1  step-down 0.4s:  buggy 13/20   corrected  4/20
+
+====================================================================================
+Reading:
+  * P+FF never reads obs[1], so its two columns must be IDENTICAL -- any
+    difference there would itself be a bug.
+  * For v1, a gap between the columns measures what the defect was worth.
+  * If the learned attacker stays near 0/20 against v1 even when corrected,
+    the defect does not explain the Step 1 failure for that defender.
+====================================================================================

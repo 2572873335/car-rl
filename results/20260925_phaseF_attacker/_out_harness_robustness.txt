@@ -1,0 +1,28 @@
+====================================================================================
+CHECK 1 -- P+FF trajectories: buggy vs corrected harness
+====================================================================================
+  ep 0: len 1001 vs 1001   term   timeout vs   timeout   identical=True
+  ep 1: len 1001 vs 1001   term   timeout vs   timeout   identical=True
+  ep 2: len 1001 vs 1001   term   timeout vs   timeout   identical=True
+  ep 3: len 1001 vs 1001   term   timeout vs   timeout   identical=True
+  ep 4: len 1001 vs 1001   term   timeout vs   timeout   identical=True
+
+  => all episodes bit-identical: True
+  (P+FF ignores obs[1], so the defect CANNOT have changed its behaviour)
+  (H-A1' needs >=60% vs BOTH; P+FF is one of the two -> the gate fails
+   on a measurement the defect does not touch)
+
+====================================================================================
+CHECK 2 -- learned attacker under a STRONGER (post-move) harness
+====================================================================================
+  vs  P+FF  buggy      harness:  0/20 crashes
+  vs  P+FF  corrected  harness:  0/20 crashes
+  vs  P+FF  post-move  harness:  0/20 crashes
+  vs v1 RL  buggy      harness:  0/20 crashes
+  vs v1 RL  corrected  harness:  0/20 crashes
+  vs v1 RL  post-move  harness: 20/20 crashes
+
+====================================================================================
+Reading: if CHECK 2 stays at/near 0/20 even for post-move, then the
+Step 1 failure is NOT an artefact of when the defender reads the obs.
+====================================================================================

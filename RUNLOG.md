@@ -1718,3 +1718,131 @@ eval_attacker.py:120     ← H-A1' 评估路径
   training_affected}.py` 与对应 `_out_*.txt`
 
 ---
+---
+
+## [2026-09-27] ★ 复核上一轮撤回：缺陷属实，但**撤回范围过大**（`ERRATUM5`）
+
+- **触发**: 接手 agent 按 §8 复现交接文档，对 `a9007c7` 的撤回结论做独立复现
+- **命令**:
+  ```
+  uv run python results/20260925_phaseF_attacker/_diag_defender_damage.py
+  uv run python results/20260925_phaseF_attacker/_diag_defect_impact.py
+  uv run python results/20260925_phaseF_attacker/_diag_harness_robustness.py
+  uv run python results/20260925_phaseF_attacker/_diag_postmove_fairness.py
+  uv run python results/20260925_phaseF_attacker/_diag_obs_probe_safety.py   # 已有
+  ```
+- **机器状态披露（F8）**: 各跑前 `pgrep` 确认为空；先跑 `make check`（规则基线 10/10、零碰撞）
+- **冻结文件**: `sha256sum -c` 与 `DATA_MANAGEMENT.md` §8 表**逐字节一致**（本次未改冻结文件）
+- **口径**: 全部为**实测命令输出**（见下方代码块），无手写汇总
+
+### 1. 缺陷本身：**确认属实**（此部分不撤回）
+
+槽 1 是**唯一**被污染的槽（`_out_defender_damage.txt`）：
+
+```
+slot 0 e (gap err)   : max |true - side| = 0.000000   (identical)
+slot 1 de (gap rate) : max |true - side| = 0.221657   <-- CORRUPTED
+slot 2 v_f (own spd) : max |true - side| = 0.000000   (identical)
+slot 3 e_lat         : max |true - side| = 0.000000   (identical)
+side-probe slot 1 is identically zero everywhere: True
+```
+
+**⇒ 缺陷、根因、影响面 2 处（`adversary_env.py:96` / `eval_attacker.py:120`）均如原文所述。**
+
+### 2. 更正一：**P+FF 不受影响**——上一轮把公式写反了
+
+**冻源码**（`follow_env.py:70`）：
+
+```python
+a = (kp * e - (0.0 if use_ff else de)) / ACT_GAIN
+```
+
+**`de` 只在 `use_ff=False`（纯 P）分支被读**；`use_ff=True` 的表达式**不碰 `obs[1]`**。
+上一轮 `AGENT_HANDOFF.md:214` 引用的 `a=(kp·e − de)/ACT` **是纯 P 的公式**。
+
+**逐位实测**：
+
+```
+P+FF  (use_ff=True) : 动作受缺陷影响的步数 =   0/106   （逐位相同）
+pure P (use_ff=False): 动作受缺陷影响的步数 = 105/106
+v1 RL (frozen)      : 动作受缺陷影响的步数 =  16/106   （Δa 最大 2.000）
+```
+
+**更强证据（逐回合逐位相同，`_out_harness_robustness.txt`）**：
+
+```
+ep 0..4: len 1001 vs 1001   term timeout vs timeout   identical=True
+=> all episodes bit-identical: True
+```
+
+**误判来源（已定位）**：`follow_env.py:67` 的**陈旧注释**写
+`env computes v_cmd = v_f + de + ACT_GAIN*a`，实际是 `v_cmd = v_l + ACT_GAIN*a`（`:163`，无 `de`）。
+**该文件冻结，按铁律 2 只能记录不能改。**
+
+### 3. 更正二：**Step 0.5 与缺陷无关**——上一轮误废
+
+`results/20260925_phaseF_step05/*.py` 用的是 `RandomWaveLeader(fe.FollowEnv)`（**另一个子类**）：
+
+```
+$ grep -n 'AttackerEnv\|_obs()' results/20260925_phaseF_step05/*.py
+（无输出）
+```
+
+**⇒ 走标准 gym 接口，无任何旁路探针**。原文 §3.3/§7 的「Step 0.5 也走同一通路」**不成立**，
+「幅值轴可训」**有效，无需复核**。
+
+### 4. 更正三：**Step 1 的 0/20 有效**，缺陷只打掉**一半归因**
+
+同一 checkpoint、**不重训**，只把防御方改为消费**上一步 `step()` 返回的真实 obs**
+（`_out_defect_impact.txt`）：
+
+```
+学到的攻击者 vs P+FF:  污染 0/20   修正 0/20
+学到的攻击者 vs v1  :  污染 0/20   修正 0/20
+
+脚本 step-down vs P+FF: 污染 20/20/20   修正 20/20/20
+脚本 step-down vs v1  : 污染 18/18/13   修正  0/ 0/ 4
+```
+
+**⇒ 三点**：
+
+1. **对 P+FF 的 0/20 是缺陷无法触及的测量**；H-A1' 要求**对两防御方都 ≥60%**，
+   **单凭 P+FF 即判定 FAIL** ⇒ **`H-A1' 0/20` 成立**（不是"衡量了残废防御方"）；
+2. **修正 harness 复原了预登记数字**：`research/ASSUMPTIONS.md` 写「对 P+FF 20/20、对 v1 0/20」，
+   修正 harness **逐项吻合**（污染 harness 的 v1 18/20 反与预登记矛盾）⇒ **修正 harness 才是忠实的**；
+3. **学习到的攻击者是"在被削弱的 v1 上训练、也在被削弱的 v1 上评估"仍是 0/20**，
+   修正只会让 v1 更强 ⇒ **不可能翻盘**。
+
+### 5. 防过度更正：一个**更强**的 harness 被否证
+
+`PostMove` 变体（防御方见"领车已动、自车未动"状态）给出 vs v1 **20/20**——方向可疑。
+**公平性检验**（`_out_postmove_fairness.txt`，**无任何对抗内容**，领车恒速 0.50）：
+
+```
+v1 under corrected  harness: mean|e| =   7.990 obs-cm   term={'timeout': 10}
+v1 under post-move  harness: mean|e| =  76.236 obs-cm   term={'collision': 10}
+```
+
+**⇒ 对 v1 是分布外输入**（无攻击时即 10/10 撞车），**该变体无效，已弃用**。
+
+### 6. 错误模式与新增通则
+
+| # | 错误 | 性质 |
+|---|---|---|
+| 1 | 把**纯 P 的公式**当成 P+FF 的公式 | 未回对冻结源码；源自陈旧行内注释 |
+| 2 | 由「走同一通路」推出「控制失效」 | **未逐对象判定影响** |
+| 3 | 把**未经过该通路**的 Step 0.5 一并作废 | 影响面只 grep 了 `_obs()` 调用点，未查 Step 0.5 用哪个 env 类 |
+
+> **新增通则（建议入 `DATA_MANAGEMENT.md` §10）**：
+> **发现测量通路缺陷时，须按【每个被测量对象】逐一判定影响**，
+> **不得由一个对象受影响推及全体**；判定依据须是**实测的动作/输出差异**，不是结构性推测。
+
+- **验收结论**: **缺陷属实、须修**（两处同修）；**但 `ERRATUM5` 把上一轮的
+  "两个结论都作废"收窄为"Step 1 的 0/20 与 Step 0.5 均有效"**；
+  **重跑 Step 1 可选，预期仍 0/20**（价值在干净存档）；
+  ★ **新浮出问题**：**正确观测下 v1 的攻击面几乎不存在（0–4/20）**
+- **产物**: `results/20260925_phaseF_attacker/_diag_{defender_damage,defect_impact,
+  harness_robustness,postmove_fairness}.py` 与对应 `_out_*.txt`；
+  `ERRATUM5_phaseF_retraction_overreach.md`（本次更正正文）
+
+---

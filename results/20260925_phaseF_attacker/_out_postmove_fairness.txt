@@ -1,0 +1,11 @@
+====================================================================================
+NULL ATTACK (leader held at constant 0.50 m/s) -- is the harness fair?
+====================================================================================
+  v1 under corrected harness: mean|e| =   7.990 obs-cm   term={'timeout': 10}
+  v1 under post-move harness: mean|e| =  76.236 obs-cm   term={'collision': 10}
+
+====================================================================================
+Reading: if v1 tracks fine under corrected but blows up under post-move
+even with NO adversarial content, the post-move obs is off-distribution
+for v1 and its 20/20 crash figure is a harness artefact, not a finding.
+====================================================================================
